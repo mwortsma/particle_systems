@@ -1,2 +1,2 @@
-# particle_systems
+# Particle Systems
 A study of particle systems.
