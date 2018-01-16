@@ -2,31 +2,32 @@ package plotutil
 
 import (
 	"github.com/mwortsma/particle_systems/probutil"
-	"github.com/gonum/plot"
-	"github.com/gonum/plot/plotter"
-	"github.com/gonum/plot/vg"
-    "github.com/gonum/plot/vg/draw"
+	"gonum.org/v1/plot"
+	"gonum.org/v1/plot/plotter"
+	"gonum.org/v1/plot/plotutil"
+	"gonum.org/v1/plot/vg"
 	"sort"
 )
 
-func getPoints(distr Distr, keys []string) plotter.XYs {
-	pts = make(plotter.XYs, len(keys))
-	for i = 0; i < len(keys); i++ {
-		pts[i].X = i
+func getPoints(distr probutil.Distr, keys []string) plotter.XYs {
+	pts := make(plotter.XYs, len(keys))
+	for i := 0; i < len(keys); i++ {
+		pts[i].X = float64(i)
 		pts[i].Y = distr[keys[i]]
 	}
 	return pts
 }
 
-func getSortedKeys(distr Distr) {
-	keys := make([]int, 0, len(distr))
+func getSortedKeys(distr probutil.Distr) []string {
+	keys := make([]string, 0, len(distr))
     for k := range distr {
         keys = append(keys, k)
     }
-    return sort.Strings(keys)
+    sort.Strings(keys)
+    return keys
 }
 
-func PlotDistr(distr Distr) {
+func PlotDistr(distr probutil.Distr) {
 	p, err := plot.New()
 	if err != nil {
 		panic(err)
@@ -38,9 +39,7 @@ func PlotDistr(distr Distr) {
 
 	sortedKeys := getSortedKeys(distr)
 	err = plotutil.AddLinePoints(p,
-		"First", getPoints(distr, sortedKeys),
-		"Second", getPoints(distr, sortedKeys),
-		"Third", getPoints(distr, sortedKeys))
+		"First", getPoints(distr, sortedKeys))
 	if err != nil {
 		panic(err)
 	}

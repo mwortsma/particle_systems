@@ -36,14 +36,17 @@ func Realization(T int, lam float64, k int, G graphutil.Graph) matutil.Mat {
 			// Send to minimum neighbor.
 			if r.Float64() < lam {
 				// First get the min value
-				min := X[t-1][G[i][0]]
-				for j := 1; j < len(G[i]); j++ {
+				min := X[t-1][i]
+				for j := 0; j < len(G[i]); j++ {
 					if X[t-1][G[i][j]] < min {
 						min = X[t-1][G[i][j]]
 					}
 				}
 				// Select, at random, a neighbor having that value.
 				min_neighbors := make([]int, 0)
+				if min == X[t-1][i] {
+					min_neighbors = append(min_neighbors, i)
+				}
 				for j := 0; j < len(G[i]); j++ {
 					if X[t-1][G[i][j]] == min {
 						min_neighbors = append(min_neighbors, G[i][j])
@@ -74,7 +77,7 @@ func RingTypicalDistr(T int, lam float64, k int, steps int) probutil.Distr  {
 		X := RingRealization(T, lam, k, 10)
 		return  X.Col(0)
 	}
-	return probutil.TypicalDistr(f, steps)
+	return probutil.TypicalDistrSync(f, steps)
 }
 
 func CompleteTypicalDistr(T int, lam float64, k int, steps int) probutil.Distr  {
@@ -82,5 +85,5 @@ func CompleteTypicalDistr(T int, lam float64, k int, steps int) probutil.Distr  
 		X := CompleteRealization(T, lam, k, 10)
 		return  X.Col(0)
 	}
-	return probutil.TypicalDistr(f, steps)
+	return probutil.TypicalDistrSync(f, steps)
 }
