@@ -5,9 +5,8 @@ import (
 	"gonum.org/v1/plot"
 	"gonum.org/v1/plot/plotter"
 	//"gonum.org/v1/plot/plotutil"
-	"image/color"
 	"gonum.org/v1/plot/vg"
-	"sort"
+	"image/color"
 )
 
 func getPoints(distr probutil.Distr, keys []string) plotter.XYs {
@@ -19,21 +18,12 @@ func getPoints(distr probutil.Distr, keys []string) plotter.XYs {
 	return pts
 }
 
-func getSortedKeys(distr probutil.Distr) []string {
-	keys := make([]string, 0, len(distr))
-    for k := range distr {
-        keys = append(keys, k)
-    }
-    sort.Strings(keys)
-    return keys
-}
-
 func getColors(n int) []color.RGBA {
-	full := []color.RGBA{color.RGBA{R: 255, G: 0, B: 0, A:255}, color.RGBA{R: 0, G: 255, B: 155, A:155}, color.RGBA{R: 0, G: 255, B: 255, A:255}}
+	full := []color.RGBA{{R: 255, G: 0, B: 0, A: 255}, {R: 0, G: 0, B: 255, A: 255}, {R: 0, G: 255, B: 0, A: 255}}
 	return full[:n]
 }
 
-func PlotDistr(title string, distributions []probutil.Distr, labels []string) {
+func PlotDistr(file string, title string, distributions []probutil.Distr, labels []string) {
 	p, err := plot.New()
 	if err != nil {
 		panic(err)
@@ -45,8 +35,8 @@ func PlotDistr(title string, distributions []probutil.Distr, labels []string) {
 	p.X.Label.Text = "Path"
 	p.Y.Label.Text = "Probability"
 
-	sortedKeys := getSortedKeys(distributions[0])
-	for i, v := range(distributions) {
+	sortedKeys := probutil.SharedSortedKeys(distributions)
+	for i, v := range distributions {
 
 		l, err := plotter.NewLine(getPoints(v, sortedKeys))
 		if err != nil {
@@ -58,10 +48,13 @@ func PlotDistr(title string, distributions []probutil.Distr, labels []string) {
 		p.Add(l)
 		p.Legend.Add(labels[i], l)
 	}
-
+	p.Legend.Left = true
+	p.Legend.Top = true
+	p.Legend.TextStyle.Font.Size = 0.25 * vg.Inch
+	p.Title.TextStyle.Font.Size = 0.25 * vg.Inch
 
 	// Save the plot to a PNG file.
-	if err := p.Save(10*vg.Inch, 10*vg.Inch, "points.png"); err != nil {
+	if err := p.Save(20*vg.Inch, 10*vg.Inch, file); err != nil {
 		panic(err)
 	}
 }

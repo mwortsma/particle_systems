@@ -1,7 +1,9 @@
 package matutil
 
 import (
+	"encoding/json"
 	"fmt"
+	"strings"
 )
 
 type Mat [][]int
@@ -9,14 +11,12 @@ type Mat [][]int
 type Vec []int
 
 func (m Mat) String() string {
-	// TODO
-	return ""
+	s := strings.Replace(fmt.Sprintf("%v", [][]int(m)), " ", ",", -1)
+	return s
 }
 
 func (v Vec) String() string {
-	// TODO
-	s := fmt.Sprintf("%v", []int(v))
-	//fmt.Println(s)
+	s := strings.Replace(fmt.Sprintf("%v", []int(v)), " ", ",", -1)
 	return s
 }
 
@@ -37,8 +37,59 @@ func (mat Mat) Col(j int) Vec {
 	return v
 }
 
+func (mat Mat) Cols(cols []int) Mat {
+	c := len(cols)
+	m := Create(len(mat), c)
+	for i := 0; i < len(mat); i++ {
+		for j := 0; j < c; j++ {
+			m[i][j] = mat[i][cols[j]]
+		}
+	}
+	return m
+}
+
+func (mat Mat) ColsT(cols []int, row int) Mat {
+	c := len(cols)
+	m := Create(row, c)
+	for i := 0; i < row; i++ {
+		for j := 0; j < c; j++ {
+			m[i][j] = mat[i][cols[j]]
+		}
+	}
+	return m
+}
+
+func (mat Mat) Colst(cols []int, row int) Vec {
+	c := len(cols)
+	v := make(Vec, c)
+	for j := 0; j < c; j++ {
+		v[j] = mat[row][cols[j]]
+	}
+	return v
+}
+
 func (mat Mat) Dims() (int, int) {
 	return len(mat), len(mat[0])
+}
+
+func StringToVec(s string) Vec {
+	var v []int
+	dec := json.NewDecoder(strings.NewReader(s))
+	err := dec.Decode(&v)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+func StringToMat(s string) Mat {
+	var m [][]int
+	dec := json.NewDecoder(strings.NewReader(s))
+	err := dec.Decode(&m)
+	if err != nil {
+		panic(err)
+	}
+	return m
 }
 
 func (mat Mat) Print() {

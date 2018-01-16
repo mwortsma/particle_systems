@@ -1,14 +1,14 @@
 package dtlb_full_gengraph
 
 import (
+	"fmt"
 	"github.com/mwortsma/particle_systems/graphutil"
-	"github.com/mwortsma/particle_systems/probutil"
 	"github.com/mwortsma/particle_systems/matutil"
+	"github.com/mwortsma/particle_systems/probutil"
 	"golang.org/x/exp/rand"
 	"gonum.org/v1/gonum/stat/distuv"
-	"time"
-	"fmt"
 	"math"
+	"time"
 )
 
 func Realization(T int, lam float64, k int, G graphutil.Graph) matutil.Mat {
@@ -72,18 +72,24 @@ func CompleteRealization(T int, lam float64, k int, n int) matutil.Mat {
 	return Realization(T, lam, k, graphutil.Complete(n))
 }
 
-func RingTypicalDistr(T int, lam float64, k int, steps int) probutil.Distr  {
-	f := func() fmt.Stringer { 
+func RingTypicalDistr(T int, lam float64, k int, steps int) probutil.Distr {
+	// how big the ring needs to be for no overlap
+	n := 1 + 4*T
+	return RingTypicalDistrN(T, lam, k, steps, n)
+}
+
+func RingTypicalDistrN(T int, lam float64, k int, steps int, n int) probutil.Distr {
+	f := func() fmt.Stringer {
 		X := RingRealization(T, lam, k, 10)
-		return  X.Col(0)
+		return X.Col(0)
 	}
 	return probutil.TypicalDistrSync(f, steps)
 }
 
-func CompleteTypicalDistr(T int, lam float64, k int, steps int) probutil.Distr  {
-	f := func() fmt.Stringer { 
-		X := CompleteRealization(T, lam, k, 10)
-		return  X.Col(0)
+func CompleteTypicalDistrN(T int, lam float64, k int, steps int, n int) probutil.Distr {
+	f := func() fmt.Stringer {
+		X := CompleteRealization(T, lam, k, n)
+		return X.Col(0)
 	}
 	return probutil.TypicalDistrSync(f, steps)
 }
