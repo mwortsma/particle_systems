@@ -2,11 +2,12 @@ package dtlb_full_gengraph
 
 import (
 	"github.com/mwortsma/particle_systems/graphutil"
+	"github.com/mwortsma/particle_systems/probutil"
 	"github.com/mwortsma/particle_systems/matutil"
 	"golang.org/x/exp/rand"
 	"gonum.org/v1/gonum/stat/distuv"
 	"time"
-	//"fmt"
+	"fmt"
 	"math"
 )
 
@@ -68,8 +69,18 @@ func CompleteRealization(T int, lam float64, k int, n int) matutil.Mat {
 	return Realization(T, lam, k, graphutil.Complete(n))
 }
 
-func Run() {
-	T, lam, k, n := 100, 0.95, 6, 100
-	RingRealization(T, lam, k, n)
-	//matutil.PrintMat(RingRealization(T, lam, k, n))
+func RingTypicalDistr(T int, lam float64, k int, steps int) probutil.Distr  {
+	f := func() fmt.Stringer { 
+		X := RingRealization(T, lam, k, 10)
+		return  X.Col(0)
+	}
+	return probutil.TypicalDistr(f, steps)
+}
+
+func CompleteTypicalDistr(T int, lam float64, k int, steps int) probutil.Distr  {
+	f := func() fmt.Stringer { 
+		X := CompleteRealization(T, lam, k, 10)
+		return  X.Col(0)
+	}
+	return probutil.TypicalDistr(f, steps)
 }

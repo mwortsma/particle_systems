@@ -7,5 +7,5 @@ import (
 )
 
 func main() {
-	dtlb_full_gengraph.Run()
+	dtlb_full_gengraph.RingTypicalDistr(4, 0.8, 10, 1000000)
 }
