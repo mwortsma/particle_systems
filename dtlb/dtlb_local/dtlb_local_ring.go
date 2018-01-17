@@ -1,4 +1,4 @@
-package dtlb_local_ring
+package dtlb_local
 
 import (
 	"fmt"
@@ -18,7 +18,7 @@ type CondDistr []map[string]probutil.Distr
 // Returns the full distribution followed by the conditional distribution,
 // the typical particle distribution and the joint and typical
 // distances at each step.
-func FixedPointIteration(
+func RingFixedPointIteration(
 	T int,
 	lam float64,
 	k int,
@@ -32,7 +32,7 @@ func FixedPointIteration(
 	typical_dists := make([]float64, 0)
 
 	for iter := 0; iter < iters; iter++ {
-		new_joint, new_cond, new_typical, cond_misses := step(T, lam, k, steps, cond)
+		new_joint, new_cond, new_typical, cond_misses := ringStep(T, lam, k, steps, cond)
 		joint_dist := dist(joint, new_joint)
 		joint_dists = append(joint_dists, joint_dist)
 		typical_dist := dist(typical, new_typical)
@@ -47,7 +47,7 @@ func FixedPointIteration(
 	return joint, typical, joint_dists, typical_dists
 }
 
-func step(
+func ringStep(
 	T int,
 	lam float64,
 	k int,
@@ -72,7 +72,7 @@ func step(
 	for step := 0; step < steps; step++ {
 		go func() {
 			defer wg.Done()
-			X, cond_missed := realization(T, lam, k, old_cond)
+			X, cond_missed := ringRealization(T, lam, k, old_cond)
 			// update joint, typical
 			rest_mutex.Lock()
 			cond_misses += cond_missed
@@ -115,7 +115,7 @@ func step(
 	return joint, cond, typical, cond_misses
 }
 
-func realization(T int, lam float64, k int, cond CondDistr) (matutil.Mat, int) {
+func ringRealization(T int, lam float64, k int, cond CondDistr) (matutil.Mat, int) {
 	// n is how many nodes we need to keep track of.
 	cond_misses := 0
 	n := 11

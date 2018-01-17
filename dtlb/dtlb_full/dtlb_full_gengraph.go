@@ -1,4 +1,4 @@
-package dtlb_full_gengraph
+package dtlb_full
 
 import (
 	"fmt"
@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-func Realization(T int, lam float64, k int, G graphutil.Graph) matutil.Mat {
+func GraphRealization(T int, lam float64, k int, G graphutil.Graph) matutil.Mat {
 	n := len(G)
 	X := matutil.Create(T, n)
 
@@ -65,28 +65,25 @@ func Realization(T int, lam float64, k int, G graphutil.Graph) matutil.Mat {
 }
 
 func RingRealization(T int, lam float64, k int, n int) matutil.Mat {
-	return Realization(T, lam, k, graphutil.Ring(n))
+	return GraphRealization(T, lam, k, graphutil.Ring(n))
 }
 
 func CompleteRealization(T int, lam float64, k int, n int) matutil.Mat {
-	return Realization(T, lam, k, graphutil.Complete(n))
+	return GraphRealization(T, lam, k, graphutil.Complete(n))
 }
 
-func RingTypicalDistr(T int, lam float64, k int, steps int) probutil.Distr {
-	// how big the ring needs to be for no overlap
-	n := 1 + 4*T
-	return RingTypicalDistrN(T, lam, k, steps, n)
-}
-
-func RingTypicalDistrN(T int, lam float64, k int, steps int, n int) probutil.Distr {
+func RingTypicalDistr(T int, lam float64, k int, n,steps int) probutil.Distr {
+	if n < 0 {
+		n = 1 + 4*T
+	}
 	f := func() fmt.Stringer {
-		X := RingRealization(T, lam, k, 10)
+		X := RingRealization(T, lam, k, n)
 		return X.Col(0)
 	}
 	return probutil.TypicalDistrSync(f, steps)
 }
 
-func CompleteTypicalDistr(T int, lam float64, k int, steps int, n int) probutil.Distr {
+func CompleteTypicalDistr(T int, lam float64, k int, n,steps int) probutil.Distr {
 	f := func() fmt.Stringer {
 		X := CompleteRealization(T, lam, k, n)
 		return X.Col(0)
