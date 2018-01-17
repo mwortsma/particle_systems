@@ -32,13 +32,13 @@ func GraphRealization(T int, p, q float64, nu float64, G graphutil.Graph) matuti
 				for j := 0; j < len(G[i]); j++ {
 					sum_neighbors += X[t-1][G[i][j]]
 				}
-				// transition with probability p/sum_neighbors
+				// transition with probability (p/deg)*sum_neighbors
 				if r.Float64() < (p/float64(len(G[i])))*float64(sum_neighbors) {
 					X[t][i] = 1
 				}
 			} else {
 				// if state is 1, transition back with porbability q
-				if r.Float64() < p {
+				if r.Float64() < q {
 					X[t][i] = 0
 				}
 			}

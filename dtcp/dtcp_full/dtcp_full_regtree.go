@@ -89,13 +89,13 @@ func (n *node) transition(t, d int, p, q float64, r *rand.Rand) {
 		for _, c := range n.children {
 			sum_neighbors += c.state[t-1]
 		}
-		// transition with probability p/sum_neighbors
+		// transition with probability (p/deg)*sum_neighbors
 		if r.Float64() < (p/float64(d))*float64(sum_neighbors) {
 			n.state[t] = 1
 		}
 	} else {
 		// if state is 1, transition back with porbability q
-		if r.Float64() < p {
+		if r.Float64() < q {
 			n.state[t] = 0
 		}
 	}

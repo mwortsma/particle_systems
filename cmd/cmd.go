@@ -5,7 +5,7 @@ import (
 	"github.com/mwortsma/particle_systems/dtlb/dtlb_local"
 	"github.com/mwortsma/particle_systems/dtlb/dtlb_mean_field"
 	//"github.com/mwortsma/particle_systems/dtlb/dtlb_local"
-	//"github.com/mwortsma/particle_systems/dtlb/dtlb_mean_field"
+	"github.com/mwortsma/particle_systems/dtcp/dtcp_mean_field"
 	"flag"
 	"fmt"
 	"github.com/mwortsma/particle_systems/dtcp/dtcp_full"
@@ -114,7 +114,7 @@ func main() {
 
 		if *mean_field {
 			if *d < 0 {
-				*d = *n
+				*d = *n-1
 			}
 			name := fmt.Sprintf("Mean Field degree=%d", *d)
 			fmt.Println("Running ", name)
@@ -155,6 +155,17 @@ func main() {
 			fmt.Println("Running", name)
 			full_distr := dtcp_full.RegTreeTypicalDistr(*T, *d, *p, *q, *nu, *steps)
 			distrs = append(distrs, full_distr)
+			labels = append(labels, name)
+		}
+
+		if *mean_field {
+			if *d < 0 {
+				*d = *n-1
+			}
+			name := fmt.Sprintf("Mean Field degree=%d", *d)
+			fmt.Println("Running ", name)
+			mean_field_distr := dtcp_mean_field.TypicalDistr(*T,*p,*q,*nu,*d,*steps)
+			distrs = append(distrs, mean_field_distr)
 			labels = append(labels, name)
 		}
 
