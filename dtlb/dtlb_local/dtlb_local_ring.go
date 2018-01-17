@@ -8,8 +8,8 @@ import (
 	"golang.org/x/exp/rand"
 	"gonum.org/v1/gonum/stat/distuv"
 	"math"
-	"time"
 	"sync"
+	"time"
 )
 
 type CondDistr []map[string]probutil.Distr
@@ -37,7 +37,7 @@ func RingFixedPointIteration(
 		joint_dists = append(joint_dists, joint_dist)
 		typical_dist := dist(typical, new_typical)
 		typical_dists = append(typical_dists, typical_dist)
-		fmt.Println(fmt.Sprintf("Iteration %d, Joint Distance: %0.4f, Typical Distance: %0.4f, Misses: %d",iter, joint_dist, typical_dist, cond_misses))
+		fmt.Println(fmt.Sprintf("Iteration %d, Joint Distance: %0.4f, Typical Distance: %0.4f, Misses: %d", iter, joint_dist, typical_dist, cond_misses))
 		joint, cond, typical = new_joint, new_cond, new_typical
 		if joint_dist < eps {
 			break
@@ -105,9 +105,9 @@ func ringStep(
 
 	// Scale conditional
 	for t := 0; t < T-1; t++ {
-		for key := range(cond[t]) {
-			for k, v := range(cond[t][key]) {
-				cond[t][key][k] = v/float64(obvserved[t][key])
+		for key := range cond[t] {
+			for k, v := range cond[t][key] {
+				cond[t][key][k] = v / float64(obvserved[t][key])
 			}
 		}
 	}

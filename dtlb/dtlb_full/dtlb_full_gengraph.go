@@ -72,7 +72,7 @@ func CompleteRealization(T int, lam float64, k int, n int) matutil.Mat {
 	return GraphRealization(T, lam, k, graphutil.Complete(n))
 }
 
-func RingTypicalDistr(T int, lam float64, k int, n,steps int) probutil.Distr {
+func RingTypicalDistr(T int, lam float64, k int, n, steps int) probutil.Distr {
 	if n < 0 {
 		n = 1 + 4*T
 	}
@@ -83,7 +83,7 @@ func RingTypicalDistr(T int, lam float64, k int, n,steps int) probutil.Distr {
 	return probutil.TypicalDistrSync(f, steps)
 }
 
-func CompleteTypicalDistr(T int, lam float64, k int, n,steps int) probutil.Distr {
+func CompleteTypicalDistr(T int, lam float64, k int, n, steps int) probutil.Distr {
 	f := func() fmt.Stringer {
 		X := CompleteRealization(T, lam, k, n)
 		return X.Col(0)

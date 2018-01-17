@@ -2,8 +2,8 @@ package dtlb_mean_field
 
 import (
 	"fmt"
-	"github.com/mwortsma/particle_systems/probutil"
 	"github.com/mwortsma/particle_systems/matutil"
+	"github.com/mwortsma/particle_systems/probutil"
 	"golang.org/x/exp/rand"
 	"gonum.org/v1/gonum/stat/distuv"
 	"math"
@@ -34,7 +34,7 @@ func Realization(T int, lam float64, k int, deg int) matutil.Vec {
 		}
 
 		// arrival at neighboring queues
-		for i := 1; i < deg+1 && X[t] < k-1; i++  {
+		for i := 1; i < deg+1 && X[t] < k-1; i++ {
 			if r.Float64() < lam {
 				curr_neighbros := []int{X[t-1], neighors[i]}
 				if chooseNeighbor(t, deg, lam, curr_neighbros, r) {
@@ -47,19 +47,19 @@ func Realization(T int, lam float64, k int, deg int) matutil.Vec {
 }
 
 func getDegPlusOneNeighbors(t int, deg int, lam float64, queues []int, break_val bool) ([]int, bool) {
-	for len(queues) < deg + 1 {
-		sample := Realization(t,lam,deg,deg)
+	for len(queues) < deg+1 {
+		sample := Realization(t, lam, deg, deg)
 		if break_val && sample[t-1] < queues[0] {
 			return []int{}, false
 		}
-		queues = append(queues,sample[t-1])
+		queues = append(queues, sample[t-1])
 	}
 	return queues, true
 }
 
 // true if send to neighbor 0
 func chooseNeighbor(t int, deg int, lam float64, queues []int, r *rand.Rand) bool {
-	queues, b := getDegPlusOneNeighbors(t,deg,lam,queues,true)
+	queues, b := getDegPlusOneNeighbors(t, deg, lam, queues, true)
 	if !b {
 		return false
 	}

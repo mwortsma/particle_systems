@@ -2,9 +2,9 @@ package probutil
 
 import (
 	"fmt"
-	"sync"
-	"sort"
 	"math"
+	"sort"
+	"sync"
 )
 
 type Distr map[string]float64
@@ -64,16 +64,16 @@ func TypicalDistr(f func() fmt.Stringer, steps int) Distr {
 	return distr
 }
 
-func L1Distance(d1,d2 Distr) (dist float64) {
-	for k, v1 := range(d1) {
+func L1Distance(d1, d2 Distr) (dist float64) {
+	for k, v1 := range d1 {
 		v2, ok := d2[k]
 		if !ok {
 			dist += v1
 		} else {
-			dist += math.Abs(v1-v2)
+			dist += math.Abs(v1 - v2)
 		}
 	}
-	for k, v := range(d2) {
+	for k, v := range d2 {
 		if _, ok := d1[k]; !ok {
 			dist += v
 		}
@@ -81,19 +81,17 @@ func L1Distance(d1,d2 Distr) (dist float64) {
 	return
 }
 
-
 func SharedSortedKeys(distrs []Distr) []string {
 	keys_map := make(map[string]bool)
-	for _, distr := range(distrs) {
+	for _, distr := range distrs {
 		for k := range distr {
 			keys_map[k] = true
 		}
 	}
 	keys := make([]string, 0)
-	for k := range(keys_map){
-		keys = append(keys,k)
+	for k := range keys_map {
+		keys = append(keys, k)
 	}
 	sort.Strings(keys)
 	return keys
 }
-

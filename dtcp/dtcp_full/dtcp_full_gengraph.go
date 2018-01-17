@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func GraphRealization(T int, p,q float64, nu float64, G graphutil.Graph) matutil.Mat {
+func GraphRealization(T int, p, q float64, nu float64, G graphutil.Graph) matutil.Mat {
 	n := len(G)
 	X := matutil.Create(T, n)
 
@@ -48,28 +48,28 @@ func GraphRealization(T int, p,q float64, nu float64, G graphutil.Graph) matutil
 	return X
 }
 
-func RingRealization(T int, p,q float64, nu float64, n int) matutil.Mat {
-	return GraphRealization(T, p,q,nu, graphutil.Ring(n))
+func RingRealization(T int, p, q float64, nu float64, n int) matutil.Mat {
+	return GraphRealization(T, p, q, nu, graphutil.Ring(n))
 }
 
-func CompleteRealization(T int, p,q float64, nu float64, n int) matutil.Mat {
-	return GraphRealization(T, p,q,nu, graphutil.Complete(n))
+func CompleteRealization(T int, p, q float64, nu float64, n int) matutil.Mat {
+	return GraphRealization(T, p, q, nu, graphutil.Complete(n))
 }
 
-func RingTypicalDistr(T int, p,q float64, nu float64, n,steps int) probutil.Distr {
+func RingTypicalDistr(T int, p, q float64, nu float64, n, steps int) probutil.Distr {
 	if n < 0 {
 		n = 1 + 2*T
 	}
 	f := func() fmt.Stringer {
-		X := RingRealization(T, p,q,nu,n)
+		X := RingRealization(T, p, q, nu, n)
 		return X.Col(0)
 	}
 	return probutil.TypicalDistrSync(f, steps)
 }
 
-func CompleteTypicalDistr(T int, p,q float64, nu float64, n,steps int) probutil.Distr {
+func CompleteTypicalDistr(T int, p, q float64, nu float64, n, steps int) probutil.Distr {
 	f := func() fmt.Stringer {
-		X := CompleteRealization(T, p,q,nu,n)
+		X := CompleteRealization(T, p, q, nu, n)
 		return X.Col(0)
 	}
 	return probutil.TypicalDistrSync(f, steps)
