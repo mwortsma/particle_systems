@@ -86,7 +86,7 @@ func RingTypicalDistrN(T int, lam float64, k int, steps int, n int) probutil.Dis
 	return probutil.TypicalDistrSync(f, steps)
 }
 
-func CompleteTypicalDistrN(T int, lam float64, k int, steps int, n int) probutil.Distr {
+func CompleteTypicalDistr(T int, lam float64, k int, steps int, n int) probutil.Distr {
 	f := func() fmt.Stringer {
 		X := CompleteRealization(T, lam, k, n)
 		return X.Col(0)

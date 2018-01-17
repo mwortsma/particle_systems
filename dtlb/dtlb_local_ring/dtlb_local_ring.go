@@ -25,7 +25,7 @@ func FixedPointIteration(
 	eps float64,
 	iters int,
 	steps int,
-	dist probutil.Distance) (probutil.Distr, CondDistr, probutil.Distr, []float64, []float64) {
+	dist probutil.Distance) (probutil.Distr, probutil.Distr, []float64, []float64) {
 
 	joint, cond, typical := make(probutil.Distr), initCond(T), make(probutil.Distr)
 	joint_dists := make([]float64, 0)
@@ -44,7 +44,7 @@ func FixedPointIteration(
 		}
 	}
 
-	return joint, cond, typical, joint_dists, typical_dists
+	return joint, typical, joint_dists, typical_dists
 }
 
 func step(
