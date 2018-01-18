@@ -1,14 +1,14 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"github.com/mwortsma/particle_systems/dtlb/dtlb_full"
 	"github.com/mwortsma/particle_systems/dtlb/dtlb_local"
 	"github.com/mwortsma/particle_systems/dtlb/dtlb_mean_field"
-	//"github.com/mwortsma/particle_systems/dtlb/dtlb_local"
-	"github.com/mwortsma/particle_systems/dtcp/dtcp_mean_field"
-	"flag"
-	"fmt"
+	"github.com/mwortsma/particle_systems/dtcp/dtcp_local"
 	"github.com/mwortsma/particle_systems/dtcp/dtcp_full"
+	"github.com/mwortsma/particle_systems/dtcp/dtcp_mean_field"
 	"github.com/mwortsma/particle_systems/plotutil"
 	"github.com/mwortsma/particle_systems/probutil"
 	"strings"
@@ -114,7 +114,7 @@ func main() {
 
 		if *mean_field {
 			if *d < 0 {
-				*d = *n-1
+				*d = *n - 1
 			}
 			name := fmt.Sprintf("Mean Field degree=%d", *d)
 			fmt.Println("Running ", name)
@@ -158,13 +158,29 @@ func main() {
 			labels = append(labels, name)
 		}
 
+		if *local_ring {
+			name := "Local (Ring)"
+			fmt.Println("Running", name)
+			_,local_ring_distr,_,_ := dtcp_local.RegTreeFixedPointIteration(*T,2,*p,*q,*nu,*eps,*iters,*steps,dist)
+			distrs = append(distrs, local_ring_distr)
+			labels = append(labels, name)
+		}
+
+		if *local_tree {
+			name := fmt.Sprintf("Local (Tree) d=%d", *d)
+			fmt.Println("Running", name)
+			_,local_tree_distr,_,_ := dtcp_local.RegTreeFixedPointIteration(*T,*d,*p,*q,*nu,*eps,*iters,*steps,dist)			
+			distrs = append(distrs, local_tree_distr)
+			labels = append(labels, name)
+		}
+
 		if *mean_field {
 			if *d < 0 {
-				*d = *n-1
+				*d = *n - 1
 			}
 			name := fmt.Sprintf("Mean Field degree=%d", *d)
 			fmt.Println("Running ", name)
-			mean_field_distr := dtcp_mean_field.TypicalDistr(*T,*p,*q,*nu,*d,*steps)
+			mean_field_distr := dtcp_mean_field.TypicalDistr(*T, *p, *q, *nu, *d, *steps)
 			distrs = append(distrs, mean_field_distr)
 			labels = append(labels, name)
 		}

@@ -20,14 +20,13 @@ func Realization(T int, p, q float64, nu float64, deg int) matutil.Vec {
 		X[0] = 1
 	}
 
-
 	for t := 1; t < T; t++ {
 		X[t] = X[t-1]
 		if X[t-1] == 0 {
 			// get the sum of the neighbors
 			sum_neighbors := 0
 			for j := 0; j < deg; j++ {
-				sample := Realization(t,p,q,nu,deg)
+				sample := Realization(t, p, q, nu, deg)
 				sum_neighbors += sample[t-1]
 			}
 			// transition with probability (p/deg)*sum_neighbors

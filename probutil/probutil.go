@@ -21,6 +21,16 @@ func Sample(d Distr, r float64) string {
 	return ""
 }
 
+func SampleInt(d map[int]float64, r float64) int {
+	s := 0.
+	for k, v := range d {
+		if s += v; s > r {
+			return k
+		}
+	}
+	return -1
+}
+
 func Update(d Distr, s string, f float64) {
 	if _, ok := d[s]; !ok {
 		d[s] = 0.
