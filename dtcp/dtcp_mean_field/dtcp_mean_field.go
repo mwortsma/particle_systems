@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func Realization(T int, p, q float64, nu float64, deg int) matutil.Vec {
+func Realization(T int, p, q float64, nu float64, d int) matutil.Vec {
 
 	X := make(matutil.Vec, T)
 
@@ -25,12 +25,12 @@ func Realization(T int, p, q float64, nu float64, deg int) matutil.Vec {
 		if X[t-1] == 0 {
 			// get the sum of the neighbors
 			sum_neighbors := 0
-			for j := 0; j < deg; j++ {
-				sample := Realization(t, p, q, nu, deg)
+			for j := 0; j < d; j++ {
+				sample := Realization(t, p, q, nu, d)
 				sum_neighbors += sample[t-1]
 			}
-			// transition with probability (p/deg)*sum_neighbors
-			if r.Float64() < (p/float64(deg))*float64(sum_neighbors) {
+			// transition with probability (p/d)*sum_neighbors
+			if r.Float64() < (p/float64(d))*float64(sum_neighbors) {
 				X[t] = 1
 			}
 		} else {
@@ -44,9 +44,10 @@ func Realization(T int, p, q float64, nu float64, deg int) matutil.Vec {
 	return X
 }
 
-func TypicalDistr(T int, p, q float64, nu float64, deg, steps int) probutil.Distr {
+func TypicalDistr(T int, p, q float64, nu float64, d, steps int) probutil.Distr {
+	fmt.Println("Running dtcp mean field d=", d)
 	f := func() fmt.Stringer {
-		return Realization(T, p, q, nu, deg)
+		return Realization(T, p, q, nu, d)
 	}
 	return probutil.TypicalDistrSync(f, steps)
 }

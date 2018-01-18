@@ -1,5 +1,8 @@
 package main
 
+// cmd is depricated. TODO delete.
+
+
 import (
 	"flag"
 	"fmt"
@@ -207,3 +210,4 @@ func main() {
 	file := "plots/" + strings.Replace(title, " ", "_", -1) + ".png"
 	plotutil.PlotDistr(file, title, distrs, labels)
 }
+

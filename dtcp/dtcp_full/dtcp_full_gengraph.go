@@ -60,6 +60,7 @@ func RingTypicalDistr(T int, p, q float64, nu float64, n, steps int) probutil.Di
 	if n < 0 {
 		n = 1 + 2*T
 	}
+	fmt.Println("Running dtcp Full Ring n=", n)
 	f := func() fmt.Stringer {
 		X := RingRealization(T, p, q, nu, n)
 		return X.Col(0)
@@ -68,6 +69,7 @@ func RingTypicalDistr(T int, p, q float64, nu float64, n, steps int) probutil.Di
 }
 
 func CompleteTypicalDistr(T int, p, q float64, nu float64, n, steps int) probutil.Distr {
+	fmt.Println("Running dtcp Full Complete n=", n)
 	f := func() fmt.Stringer {
 		X := CompleteRealization(T, p, q, nu, n)
 		return X.Col(0)
