@@ -83,7 +83,7 @@ func main() {
 		return
 	}
 
-	fmt.Printf("Discrete Time Contact Process: ")
+	fmt.Println("Discrete Time Contact Process: ")
 
 	var distr probutil.Distr
 

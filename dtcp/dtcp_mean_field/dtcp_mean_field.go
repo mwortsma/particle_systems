@@ -45,7 +45,7 @@ func Realization(T int, p, q float64, nu float64, d int) matutil.Vec {
 }
 
 func TypicalDistr(T int, p, q float64, nu float64, d, steps int) probutil.Distr {
-	fmt.Println("Running dtcp mean field d=", d)
+	fmt.Println("Running dtcp mean field d =", d)
 	f := func() fmt.Stringer {
 		return Realization(T, p, q, nu, d)
 	}

@@ -22,7 +22,7 @@ func RegTreeFixedPointIteration(
 	steps int,
 	dist probutil.Distance) (probutil.Distr, probutil.Distr, []float64, []float64) {
 
-	fmt.Println("Running dtcp local fixed point simulation d=", d)
+	fmt.Println("Running dtcp local fixed point simulation d =", d)
 
 	joint, cond, typical := make(probutil.Distr), initCond(T), make(probutil.Distr)
 	joint_dists := make([]float64, 0)
