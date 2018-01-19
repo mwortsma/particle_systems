@@ -27,6 +27,8 @@ func RingFixedPointIteration(
 	steps int,
 	dist probutil.Distance) (probutil.Distr, probutil.Distr, []float64, []float64) {
 
+	fmt.Println("Running dtlb ring local T = ", T)
+
 	joint, cond, typical := make(probutil.Distr), initCond(T), make(probutil.Distr)
 	joint_dists := make([]float64, 0)
 	typical_dists := make([]float64, 0)

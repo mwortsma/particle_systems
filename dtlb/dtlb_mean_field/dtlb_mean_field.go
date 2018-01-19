@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func Realization(T int, lam float64, k int, deg int) matutil.Vec {
+func Realization(T int, lam float64, k int, d int) matutil.Vec {
 	X := make(matutil.Vec, T)
 
 	// Ger random number to be used throughout
@@ -26,18 +26,18 @@ func Realization(T int, lam float64, k int, deg int) matutil.Vec {
 			X[t] = X[t-1] - 1
 		}
 		// get samples for all the neighbors
-		neighors, _ := getDegPlusOneNeighbors(t, deg, lam, []int{X[t-1]}, false)
+		neighors, _ := getDegPlusOneNeighbors(t, d, lam, []int{X[t-1]}, false)
 
 		// arrival at my queue
-		if r.Float64() < lam && chooseNeighbor(t, deg, lam, neighors, r) {
+		if r.Float64() < lam && chooseNeighbor(t, d, lam, neighors, r) {
 			X[t]++
 		}
 
 		// arrival at neighboring queues
-		for i := 1; i < deg+1 && X[t] < k-1; i++ {
+		for i := 1; i < d+1 && X[t] < k-1; i++ {
 			if r.Float64() < lam {
 				curr_neighbros := []int{X[t-1], neighors[i]}
-				if chooseNeighbor(t, deg, lam, curr_neighbros, r) {
+				if chooseNeighbor(t, d, lam, curr_neighbros, r) {
 					X[t]++
 				}
 			}
@@ -46,9 +46,9 @@ func Realization(T int, lam float64, k int, deg int) matutil.Vec {
 	return X
 }
 
-func getDegPlusOneNeighbors(t int, deg int, lam float64, queues []int, break_val bool) ([]int, bool) {
-	for len(queues) < deg+1 {
-		sample := Realization(t, lam, deg, deg)
+func getDegPlusOneNeighbors(t int, d int, lam float64, queues []int, break_val bool) ([]int, bool) {
+	for len(queues) < d+1 {
+		sample := Realization(t, lam, d, d)
 		if break_val && sample[t-1] < queues[0] {
 			return []int{}, false
 		}
@@ -58,21 +58,21 @@ func getDegPlusOneNeighbors(t int, deg int, lam float64, queues []int, break_val
 }
 
 // true if send to neighbor 0
-func chooseNeighbor(t int, deg int, lam float64, queues []int, r *rand.Rand) bool {
-	queues, b := getDegPlusOneNeighbors(t, deg, lam, queues, true)
+func chooseNeighbor(t int, d int, lam float64, queues []int, r *rand.Rand) bool {
+	queues, b := getDegPlusOneNeighbors(t, d, lam, queues, true)
 	if !b {
 		return false
 	}
 	// First get the min value
 	min := queues[0]
-	for j := 1; j < deg+1; j++ {
+	for j := 1; j < d+1; j++ {
 		if queues[j] < min {
 			min = queues[j]
 		}
 	}
 	// Select, at random, a neighbor having that value.
 	min_queues := make([]int, 0)
-	for j := 0; j < deg+1; j++ {
+	for j := 0; j < d+1; j++ {
 		if queues[j] == min {
 			min_queues = append(min_queues, j)
 		}
@@ -80,9 +80,10 @@ func chooseNeighbor(t int, deg int, lam float64, queues []int, r *rand.Rand) boo
 	return min_queues[r.Intn(len(min_queues))] == 0
 }
 
-func TypicalDistr(T int, lam float64, k int, deg int, steps int) probutil.Distr {
+func TypicalDistr(T int, lam float64, k int, d int, steps int) probutil.Distr {
+	fmt.Println("Running dtlb mean field d =", d)
 	f := func() fmt.Stringer {
-		return Realization(T, lam, k, deg)
+		return Realization(T, lam, k, d)
 	}
 	return probutil.TypicalDistrSync(f, steps)
 }

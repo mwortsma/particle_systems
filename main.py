@@ -8,7 +8,8 @@ import string
 parser=argparse.ArgumentParser()
 
 parser.add_argument('-keep', action='store_true')
-parser.add_argument('-plot', action='store_true')
+parser.add_argument('-show_plot', action='store_true')
+parser.add_argument('-save_plot', action='store')
 parser.add_argument('-binary_path', action='store')
 parser.add_argument('-commands', action='store')
 parser.add_argument('-labels', action='store')
@@ -62,8 +63,8 @@ for f in files:
 		distributions.append(d)
 
 # Plot
-if args.plot:
-	plot.plot(distributions, labels)
+if args.save_plot or args.show_plot:
+	plot.plot(distributions, labels, args.show_plot, args.save_plot)
 
 # Delete the files if keep=True
 if not args.keep:
