@@ -73,6 +73,7 @@ func CompleteRealization(T int, lam float64, k int, n int) matutil.Mat {
 }
 
 func RingTypicalDistr(T int, lam float64, k int, n, steps int) probutil.Distr {
+	fmt.Println("Running dtlb full ring T =", T, "n = ", n)
 	if n < 0 {
 		n = 1 + 4*T
 	}
@@ -84,6 +85,7 @@ func RingTypicalDistr(T int, lam float64, k int, n, steps int) probutil.Distr {
 }
 
 func CompleteTypicalDistr(T int, lam float64, k int, n, steps int) probutil.Distr {
+	fmt.Println("Running dtlb full Complete T =", T, "n = ", n)
 	f := func() fmt.Stringer {
 		X := CompleteRealization(T, lam, k, n)
 		return X.Col(0)

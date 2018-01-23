@@ -1,4 +1,4 @@
-package dtcp_full
+package ctcp_full
 
 import (
 	//"fmt"
