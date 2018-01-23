@@ -1,11 +1,11 @@
 package ctcp_full
 
 import (
-	//"fmt"
+	"fmt"
 	"github.com/mwortsma/particle_systems/ctmc"
 	"github.com/mwortsma/particle_systems/graphutil"
 	"github.com/mwortsma/particle_systems/matutil"
-	// "github.com/mwortsma/particle_systems/probutil"
+	"github.com/mwortsma/particle_systems/probutil"
 	"golang.org/x/exp/rand"
 	"time"
 )
@@ -55,6 +55,28 @@ func RingRealization(T int, lam float64, nu float64, n int) ([]float64, matutil.
 func CompleteRealization(T int, lam float64, nu float64, n int) ([]float64, matutil.Mat) {
 	return GraphRealization(T, lam, nu, graphutil.Complete(n), n-1)
 }
+
+func RingTypicalDistr(T int, lam float64, nu, dt float64, n, steps int) probutil.ContDistr {
+	if n < 0 {
+		n = 1 + 2*T
+	}
+	fmt.Println("Running ctcp Full Ring n =", n)
+	f := func() ([]float64, matutil.Vec) {
+		times, X := RingRealization(T, lam, nu, n)
+		return times, X.Col(0)
+	}
+	return probutil.TypicalContDistrSync(f, dt, T, 2, steps)
+}
+
+func CompleteTypicalDistr(T int, lam float64, nu, dt float64, n, steps int) probutil.ContDistr {
+	fmt.Println("Running ctcp Full Complete n =", n)
+	f := func() ([]float64, matutil.Vec) {
+		times, X := CompleteRealization(T, lam, nu, n)
+		return times, X.Col(0)
+	}
+	return probutil.TypicalContDistrSync(f, dt, T, 2, steps)
+}
+
 
 func getRatesAndEvents(
 	X []int, 

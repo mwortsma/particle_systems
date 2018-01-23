@@ -4,23 +4,22 @@ import (
 	"flag"
 	"fmt"
 	//"github.com/mwortsma/particle_systems/ctcp/ctcp_local"
-	//"github.com/mwortsma/particle_systems/ctcp/ctcp_full"
+	"github.com/mwortsma/particle_systems/ctcp/ctcp_full"
 	//"github.com/mwortsma/particle_systems/ctcp/ctcp_mean_field"
 	"github.com/mwortsma/particle_systems/probutil"
 	"encoding/json"
-	//"io/ioutil"
+	"io/ioutil"
 )
 
 func main() {
 
-	// Discrete Time Contact Process.
+	// Continuous Time Contact Process.
 
 	// Generel Arguments
 	// -d=x (degree of a node)
 	// -n=x (number of nodes)
 	// -T=x (time horizon. T > 0)
-	// -p=x (transition 0->1 with probability (p/d)*sum(neighbors))
-	// -q=x (transntion 1->0 with probability q)
+	// -lam=x (incoming rate at each)
 	// -nu=x (P(X_0 = 1))
 	// -steps=x (how many samples used in generating the empirical distribtuion)
 	// -file=x (which file to save the distribution to. empty = do not save)
@@ -38,8 +37,6 @@ func main() {
 	// Defining the arguments.
 	full_ring := flag.Bool("full_ring", false, "Full sim on the ring")
 	full_complete := flag.Bool("full_complete", false, "Full sim on the complete graph")
-	full_tree := flag.Bool("full_tree", false, "Full sim on a regular tree")
-
 
 	mean_field := flag.Bool("mean_field", false, "Mean Field simulation.")
 
@@ -52,20 +49,22 @@ func main() {
 	var file_str string
 	flag.StringVar(&file_str, "file", "", "where to save the distribution.")
 
+	/*
 	eps := flag.Float64("epsilon", 0.001, "threshold distance between typical particle distributions")
 	iters := flag.Int("iters", 4, "for the fixed point algorithm, how many iterations to run")
 	var distance_str string
 	flag.StringVar(&distance_str, "distance", "L1", "type of distance between distributions. Options: L1, more to come...")
+	*/
 
 	flag.Parse()
 
 	fmt.Println("Continuous Time Contact Process: ")
 
-	var distr probutil.Distr
+	var distr probutil.ContDistr
 
 	switch {
 	case *full_ring:
-		fmt.Println("Not yet implemented")
+		distr = ctcp_full.RingTypicalDistr(*T, *lam, *nu, *dt, *n, *steps)
 
 	case *full_complete:
 		fmt.Println("Not yet implemented")
@@ -79,7 +78,7 @@ func main() {
 		panic(err)
 	}
 
-	/*
+	
 	fmt.Println("Writing to file ...")
 
 	if file_str != "" {
@@ -88,6 +87,5 @@ func main() {
 			panic(err)
 		}
 	}
-	*/
 
 }

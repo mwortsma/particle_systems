@@ -7,32 +7,10 @@ import (
 	"sync"
 )
 
-// Continuous time distributions
-type BinaryContDistr map[float64]float64
 
 // Distr, distance used for discrete time
 type Distr map[string]float64
 type Distance func(Distr, Distr) float64
-
-func Sample(d Distr, r float64) string {
-	s := 0.
-	for k, v := range d {
-		if s += v; s > r {
-			return k
-		}
-	}
-	return ""
-}
-
-func SampleInt(d map[int]float64, r float64) int {
-	s := 0.
-	for k, v := range d {
-		if s += v; s > r {
-			return k
-		}
-	}
-	return -1
-}
 
 func Update(d Distr, s string, f float64) {
 	if _, ok := d[s]; !ok {

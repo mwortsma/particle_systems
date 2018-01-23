@@ -18,10 +18,7 @@ parser.add_argument('-files', action='store')
 args=parser.parse_args()
 
 # Commands
-commands = [
-	"dtcp -full_ring -steps=10000 -T=5",
-	"dtcp -local_ring -steps=10000 -T=5",
-] if args.commands is None else args.commands.split(",")
+commands = [] if args.commands is None else args.commands.split(",")
 commands = [c.strip() for c in commands]
 
 # Lables
@@ -39,11 +36,6 @@ tmp_folder = 'tmp_files'
 if os.path.isdir(tmp_folder):
 	files = [os.path.join(tmp_folder, f.strip()) for f in files]
 	print files
-
-# Check length equality
-if len(commands) != len(labels) or len(labels) != len(files):
-	print("Error: Length of labels, files, commands need to be equal.")
-	exit(0)
 
 # Binary Path
 if args.binary_path and args.binary_path[-1] != '/': args.binary_path += '/'
