@@ -11,21 +11,22 @@ import (
 )
 
 func GraphRealization(
-	T int, 
+	T float64, 
 	lam float64,
 	nu float64, 
 	G graphutil.Graph,
 	k int) ([]float64, matutil.Mat) {
 
 	n := len(G)
-	X := matutil.Create(T, n)
+	X := make([][]int, 1)
+	X[0] = make([]int, n)
 
 	// Ger random number to be used throughout
 	r := rand.New(rand.NewSource(uint64(time.Now().UnixNano())))
 
 	// keep track of times
-	times := make([]float64, T)
-	time := 0.0
+	times := make([]float64, 1)
+	t := 0.0
 
 	// Initial conditions.
 	for i := 0; i < n; i++ {
@@ -34,32 +35,36 @@ func GraphRealization(
 		}
 	}
 
-	for t := 1; t < T; t++ {
-		rates, events := getRatesAndEvents(X[t-1], lam, G, k)
+	for  {
+		rates, events := getRatesAndEvents(X[len(X)-1], lam, G, k)
+		if len(rates) == 0 {
+			break
+		}
 		event_index, time_inc := ctmc.StepCTMC(rates)
 		chosen_event := events[event_index]
-		// Copy the state of X[t-1] to X[t]
-		copy(X[t], X[t-1])
-		X[t][chosen_event.Index] += chosen_event.Inc
-		time += time_inc
-		times[t] = time
+		t += time_inc
+		if t > T {
+			break
+		}
+		times = append(times, t)
+		newstate := make([]int, n)
+		copy(newstate, X[len(X)-1])
+		newstate[chosen_event.Index] += chosen_event.Inc
+		X = append(X, newstate)
 	}
 
 	return times, X
 }
 
-func RingRealization(T int, lam float64, nu float64, n int) ([]float64, matutil.Mat) {
+func RingRealization(T float64, lam float64, nu float64, n int) ([]float64, matutil.Mat) {
 	return GraphRealization(T, lam, nu, graphutil.Ring(n), 2)
 }
 
-func CompleteRealization(T int, lam float64, nu float64, n int) ([]float64, matutil.Mat) {
+func CompleteRealization(T float64, lam float64, nu float64, n int) ([]float64, matutil.Mat) {
 	return GraphRealization(T, lam, nu, graphutil.Complete(n), n-1)
 }
 
-func RingTypicalDistr(T int, lam float64, nu, dt float64, n, steps int) probutil.ContDistr {
-	if n < 0 {
-		n = 1 + 2*T
-	}
+func RingTypicalDistr(T float64, lam float64, nu, dt float64, n, steps int) probutil.ContDistr {
 	fmt.Println("Running ctcp Full Ring n =", n)
 	f := func() ([]float64, matutil.Vec) {
 		times, X := RingRealization(T, lam, nu, n)
@@ -68,7 +73,7 @@ func RingTypicalDistr(T int, lam float64, nu, dt float64, n, steps int) probutil
 	return probutil.TypicalContDistrSync(f, dt, T, 2, steps)
 }
 
-func CompleteTypicalDistr(T int, lam float64, nu, dt float64, n, steps int) probutil.ContDistr {
+func CompleteTypicalDistr(T float64, lam float64, nu, dt float64, n, steps int) probutil.ContDistr {
 	fmt.Println("Running ctcp Full Complete n =", n)
 	f := func() ([]float64, matutil.Vec) {
 		times, X := CompleteRealization(T, lam, nu, n)

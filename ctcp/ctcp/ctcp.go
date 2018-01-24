@@ -41,7 +41,7 @@ func main() {
 	mean_field := flag.Bool("mean_field", false, "Mean Field simulation.")
 
 	n := flag.Int("n", -1, "number of nodes")
-	T := flag.Int("T", 2, "time horizon. T>0")
+	T := flag.Float64("T", 2, "time horizon. T>0")
 	lam := flag.Float64("lam", 0.8, "incoming rate at each node")
 	dt := flag.Float64("dt", 0.01, "How to discritize time.")
 	nu := flag.Float64("nu", 0.5, "P(X_0 = 1)")

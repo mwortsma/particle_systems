@@ -8,7 +8,7 @@ import (
 
 type ContDistr struct {
 	Dt float64
-	T int
+	T float64
 	K int
 	Distr [][]float64
 }
@@ -16,7 +16,8 @@ type ContDistr struct {
 func TypicalContDistrSync(
 	f func()([]float64, matutil.Vec), 
 	dt float64, 
-	T, k, steps int) ContDistr {
+	T float64,
+	k, steps int) ContDistr {
 
 	length := int(float64(T)/dt)
 	cdistr := make([][]float64, length)
@@ -33,7 +34,7 @@ func TypicalContDistrSync(
 		go func() {
 			defer wg.Done()
 			times, X := f()
-
+			fmt.Println(X)
 			fmt.Println(times)
 			mutex.Lock()
 			defer mutex.Unlock()
@@ -42,9 +43,10 @@ func TypicalContDistrSync(
 			curr_time := 0.0
 			for i := 0; i < length; i++ {
 				for curr_index < len(times) - 1 && 
-				times[curr_index+1] >= curr_time {
+				times[curr_index+1] < curr_time {
 					curr_index += 1
 				}
+				fmt.Println("curr index", curr_index, "with val", X[curr_index])
 				cdistr[i][X[curr_index]] += inc
 				curr_time += dt
 			}
