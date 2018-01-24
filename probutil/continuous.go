@@ -1,7 +1,7 @@
 package probutil
 
 import (
-	"fmt"
+	//"fmt"
 	"sync"
 	"github.com/mwortsma/particle_systems/matutil"
 )
@@ -34,8 +34,6 @@ func TypicalContDistrSync(
 		go func() {
 			defer wg.Done()
 			times, X := f()
-			fmt.Println(X)
-			fmt.Println(times)
 			mutex.Lock()
 			defer mutex.Unlock()
 
@@ -46,7 +44,6 @@ func TypicalContDistrSync(
 				times[curr_index+1] < curr_time {
 					curr_index += 1
 				}
-				fmt.Println("curr index", curr_index, "with val", X[curr_index])
 				cdistr[i][X[curr_index]] += inc
 				curr_time += dt
 			}

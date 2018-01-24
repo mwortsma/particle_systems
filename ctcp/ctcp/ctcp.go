@@ -43,7 +43,7 @@ func main() {
 	n := flag.Int("n", -1, "number of nodes")
 	T := flag.Float64("T", 2, "time horizon. T>0")
 	lam := flag.Float64("lam", 0.8, "incoming rate at each node")
-	dt := flag.Float64("dt", 0.01, "How to discritize time.")
+	dt := flag.Float64("dt", 0.25, "How to discritize time.")
 	nu := flag.Float64("nu", 0.5, "P(X_0 = 1)")
 	steps := flag.Int("steps", 100, "how many samples used in generating the empirical distribtuion")
 	var file_str string

@@ -14,6 +14,7 @@ parser.add_argument('-binary_path', action='store')
 parser.add_argument('-commands', action='store')
 parser.add_argument('-labels', action='store')
 parser.add_argument('-files', action='store')
+parser.add_argument('-type', action='store')
 
 args=parser.parse_args()
 
@@ -56,7 +57,12 @@ for f in files:
 
 # Plot
 if args.save_plot or args.show_plot:
-	plot.plot(distributions, labels, args.show_plot, args.save_plot)
+	print args.type
+	if args.type is None or args.type == 'discrete':
+		plot.plot_discrete(distributions, labels, args.show_plot, args.save_plot)
+	elif args.type == 'continuous':
+		plot.plot_continuous(distributions, labels, args.show_plot, args.save_plot)
+
 
 # Delete the files if keep=True
 if not args.keep:
