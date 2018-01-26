@@ -1,7 +1,7 @@
 package ctcp_mean_field
 
 import (
-	"fmt"
+	//"fmt"
 	"github.com/mwortsma/particle_systems/probutil"
 	"github.com/mwortsma/particle_systems/matutil"
 	"golang.org/x/exp/rand"
@@ -9,51 +9,11 @@ import (
 )
 
 // todo distance
-func MeanFieldFixedPointIteration(
+func MeanFieldRealization(
 	T float64,
 	lam float64,
-	nu float64,
-	dt float64,
-	eps float64,
-	iters int,
-	steps int,
-	dist probutil.ContDistance) probutil.ContDistr {
-
-	f := probutil.ContDistr{T: T, Dt: dt}
-	for iter := 0; iter < iters; iter++ {
-
-		evolve_function := func()([]float64, matutil.Vec) {
-			return evolveSystem(T, lam, nu, f)
-		}
-
-		new_f := probutil.TypicalContDistrSync(evolve_function,dt,T,2,steps)
-
-		distance := 1.0
-		if iter >= 1 {
-			distance = dist(f,new_f)
-		}
-
-		f = new_f
-
-		fmt.Println(fmt.Sprintf("Iteration %d, Distance %0.5f", iter, distance))
-
-		if distance < eps {
-			break
-		}
-
-	}
-
-	return f
-}
-
-
-
-func evolveSystem(
-	T float64,
-	lam float64, 
-	nu float64,  
-	f probutil.ContDistr) ([]float64, matutil.Vec){
-
+	nu float64) ([]float64, matutil.Vec)  {
+	
 	X := make(matutil.Vec, 1)
 
 	// Ger random number to be used throughout
@@ -68,13 +28,18 @@ func evolveSystem(
 	times := make([]float64, 1)
 	t := 0.0
 
-	for {
+	for t < T {
 		if X[len(X)-1] == 0 {
 			// get ratio of infected neighbors.
-			infected := 1.0-nu
-			if len(f.Distr) > 0 {
-				infected = f.Distr[int(t/f.Dt)][1]
+			m := 1
+			for {
+				_, v := MeanFieldRealization(t, lam, nu)
+				if v[len(v)-1] == 1 {
+					break
+				}
+				m += 1
 			}
+			infected := 1.0/float64(m)
 			// Draw an exponential random variable with rate lam*infected
 			t += r.ExpFloat64() / (lam * infected)
 		} else {
@@ -89,4 +54,11 @@ func evolveSystem(
 	}
 
 	return times, X
+}
+
+func RealizationTypicalDistr(T, lam float64, nu, dt float64, steps int) probutil.ContDistr {
+	f := func() ([]float64, matutil.Vec) {
+		return MeanFieldRealization(T,lam,nu)
+	}
+	return probutil.TypicalContDistrSync(f, dt, T, 2, steps)
 }

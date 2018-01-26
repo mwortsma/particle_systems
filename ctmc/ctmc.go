@@ -29,7 +29,7 @@ func StepCTMC(rates []float64) (event int, time_inc float64) {
 		scaled_rates[i] = rate/sum_rates
 	}
 	// draw a time ~ exp(sum_rates)
-	time_inc = r.ExpFloat64() * sum_rates
+	time_inc = r.ExpFloat64() / sum_rates
 	// choose an event with probability proportional to the rate
 	rand := r.Float64()
 	cumsum := 0.0

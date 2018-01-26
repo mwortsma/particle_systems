@@ -39,6 +39,8 @@ func main() {
 	full_complete := flag.Bool("full_complete", false, "Full sim on the complete graph")
 
 	mean_field_fp := flag.Bool("mean_field_fp", false, "Mean Field fp simulation.")
+	mean_field_realization := flag.Bool("mean_field_realization", false, "Mean Field realization.")
+
 
 	n := flag.Int("n", -1, "number of nodes")
 	T := flag.Float64("T", 2, "time horizon. T>0")
@@ -69,7 +71,10 @@ func main() {
 	case *mean_field_fp:
 		// e.g. python main.py -show_plot -commands="ctcp -mean_field_fp -iters=10 -dt=0.1 -steps=100000 -epsilon=0.01" -type="continuous" -labels="fp"
 		distr = ctcp_mean_field.MeanFieldFixedPointIteration(
-			*T,*lam,*nu,2,*dt,*eps,*iters,*steps,probutil.ContL1Distance)
+			*T,*lam,*nu,*dt,*eps,*iters,*steps,probutil.ContL1Distance)
+
+	case *mean_field_realization:
+		distr = ctcp_mean_field.RealizationTypicalDistr(*T, *lam, *nu, *dt, *steps)
 
 	}
 
