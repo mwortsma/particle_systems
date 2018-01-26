@@ -72,6 +72,8 @@ func L1Distance(d1, d2 Distr) (dist float64) {
 	return
 }
 
+
+// Depricated
 func SharedSortedKeys(distrs []Distr) []string {
 	keys_map := make(map[string]bool)
 	for _, distr := range distrs {

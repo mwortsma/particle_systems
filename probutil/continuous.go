@@ -1,8 +1,8 @@
 package probutil
 
 import (
-	//"fmt"
 	"sync"
+	"math"
 	"github.com/mwortsma/particle_systems/matutil"
 )
 
@@ -12,12 +12,14 @@ type ContDistr struct {
 	K int
 	Distr [][]float64
 }
+type ContDistance func(ContDistr, ContDistr) float64
 
 func TypicalContDistrSync(
 	f func()([]float64, matutil.Vec), 
 	dt float64, 
 	T float64,
-	k, steps int) ContDistr {
+	k int,
+	steps int) ContDistr {
 
 	length := int(float64(T)/dt)
 	cdistr := make([][]float64, length)
@@ -51,4 +53,13 @@ func TypicalContDistrSync(
 	}
 	wg.Wait()
 	return ContDistr{dt, T, k, cdistr}
+}
+
+func ContL1Distance(d1, d2 ContDistr) (dist float64) {
+	for i := 0; i < int(float64(d1.T)/d1.Dt); i++ {
+		for j := 0; j < d1.K-1; j++ {
+			dist += math.Abs(d1.Distr[i][j] - d2.Distr[i][j])
+		}
+	}
+	return
 }

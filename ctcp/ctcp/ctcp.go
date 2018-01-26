@@ -5,7 +5,7 @@ import (
 	"fmt"
 	//"github.com/mwortsma/particle_systems/ctcp/ctcp_local"
 	"github.com/mwortsma/particle_systems/ctcp/ctcp_full"
-	//"github.com/mwortsma/particle_systems/ctcp/ctcp_mean_field"
+	"github.com/mwortsma/particle_systems/ctcp/ctcp_mean_field"
 	"github.com/mwortsma/particle_systems/probutil"
 	"encoding/json"
 	"io/ioutil"
@@ -38,7 +38,7 @@ func main() {
 	full_ring := flag.Bool("full_ring", false, "Full sim on the ring")
 	full_complete := flag.Bool("full_complete", false, "Full sim on the complete graph")
 
-	mean_field := flag.Bool("mean_field", false, "Mean Field simulation.")
+	mean_field_fp := flag.Bool("mean_field_fp", false, "Mean Field fp simulation.")
 
 	n := flag.Int("n", -1, "number of nodes")
 	T := flag.Float64("T", 2, "time horizon. T>0")
@@ -49,12 +49,9 @@ func main() {
 	var file_str string
 	flag.StringVar(&file_str, "file", "", "where to save the distribution.")
 
-	/*
+	
 	eps := flag.Float64("epsilon", 0.001, "threshold distance between typical particle distributions")
 	iters := flag.Int("iters", 4, "for the fixed point algorithm, how many iterations to run")
-	var distance_str string
-	flag.StringVar(&distance_str, "distance", "L1", "type of distance between distributions. Options: L1, more to come...")
-	*/
 
 	flag.Parse()
 
@@ -67,10 +64,13 @@ func main() {
 		distr = ctcp_full.RingTypicalDistr(*T, *lam, *nu, *dt, *n, *steps)
 
 	case *full_complete:
-		fmt.Println("Not yet implemented")
+		distr = ctcp_full.CompleteTypicalDistr(*T, *lam, *nu, *dt, *n, *steps)
 
-	case *mean_field:
-		fmt.Println("Not yet implemented.")
+	case *mean_field_fp:
+		// e.g. python main.py -show_plot -commands="ctcp -mean_field_fp -iters=10 -dt=0.1 -steps=100000 -epsilon=0.01" -type="continuous" -labels="fp"
+		distr = ctcp_mean_field.MeanFieldFixedPointIteration(
+			*T,*lam,*nu,2,*dt,*eps,*iters,*steps,probutil.ContL1Distance)
+
 	}
 
 	b, err := json.Marshal(distr)

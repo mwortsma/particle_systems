@@ -36,7 +36,7 @@ func GraphRealization(
 	}
 
 	for  {
-		rates, events := getRatesAndEvents(X[len(X)-1], lam, G, k)
+		rates, events := ctmc.GetCPRatesAndEvents(X[len(X)-1], lam, G, k)
 		if len(rates) == 0 {
 			break
 		}
@@ -82,31 +82,3 @@ func CompleteTypicalDistr(T float64, lam float64, nu, dt float64, n, steps int) 
 	return probutil.TypicalContDistrSync(f, dt, T, 2, steps)
 }
 
-
-func getRatesAndEvents(
-	X []int, 
-	lam float64, 
-	G graphutil.Graph,
-	k int) ([]float64, []ctmc.Event) {
-
-	rates := make([]float64, 0)
-	events := make([]ctmc.Event, 0)
-
-	for i := range(X) {
-
-		if X[i] == 1 {
-			// recover
-			rates = append(rates, 1)
-			events = append(events, ctmc.Event{Index: i, Inc: -1})
-
-			for j := range(G[i]) {
-				if X[j] == 0 {
-					// infect
-					rates = append(rates, lam/float64(k))
-					events = append(events, ctmc.Event{Index: j, Inc: 1})
-				}
-			}
-		}
-	}
-	return rates, events
-}
