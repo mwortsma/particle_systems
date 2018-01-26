@@ -6,6 +6,7 @@ import (
 	"github.com/mwortsma/particle_systems/matutil"
 	"golang.org/x/exp/rand"
 	"time"
+	"math"
 )
 
 // todo distance
@@ -51,7 +52,7 @@ func MeanFieldFixedPointIteration(
 func evolveSystem(
 	T float64,
 	lam float64, 
-	nu float64,  
+	nu float64,
 	f probutil.ContDistr) ([]float64, matutil.Vec){
 
 	X := make(matutil.Vec, 1)
@@ -70,18 +71,29 @@ func evolveSystem(
 
 	for {
 		if X[len(X)-1] == 0 {
-			// get ratio of infected neighbors.
-			infected := 1.0-nu
-			if len(f.Distr) > 0 {
-				infected = f.Distr[int(t/f.Dt)][1]
+
+			if len(f.Distr) == 0 {
+				// TODO this is in the case of no distributin f
+				infected := 1.0-nu
+				t += r.ExpFloat64() / (lam * infected)
+			} else {
+				for {
+					// prob of an arrival in this process is 1-e^{-lambda*infected*dt}
+					if t >= T - f.Dt {
+						return times, X
+					} else if r.Float64() < 1.0-math.Exp(-lam*f.Distr[int(t/f.Dt)][1]*f.Dt) {
+						t += f.Dt
+						break
+					}
+					t += f.Dt
+				}
 			}
-			// Draw an exponential random variable with rate lam*infected
-			t += r.ExpFloat64() / (lam * infected)
+			
 		} else {
 			// Draw an exponential random variable with rate 1.
 			t += r.ExpFloat64()
 		}
-		if t > T {
+		if t >= T {
 			break
 		}
 		times = append(times, t)

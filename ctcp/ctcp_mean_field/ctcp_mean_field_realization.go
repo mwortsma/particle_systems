@@ -1,18 +1,20 @@
 package ctcp_mean_field
 
 import (
-	//"fmt"
+	"fmt"
 	"github.com/mwortsma/particle_systems/probutil"
 	"github.com/mwortsma/particle_systems/matutil"
 	"golang.org/x/exp/rand"
 	"time"
+	"math"
 )
 
 // todo distance
 func MeanFieldRealization(
 	T float64,
 	lam float64,
-	nu float64) ([]float64, matutil.Vec)  {
+	nu float64,
+	dt float64) ([]float64, matutil.Vec)  {
 	
 	X := make(matutil.Vec, 1)
 
@@ -30,35 +32,36 @@ func MeanFieldRealization(
 
 	for t < T {
 		if X[len(X)-1] == 0 {
-			// get ratio of infected neighbors.
-			m := 1
-			for {
-				_, v := MeanFieldRealization(t, lam, nu)
-				if v[len(v)-1] == 1 {
+
+			for t <= T - dt {
+				_, v := MeanFieldRealization(t, lam, nu, dt)
+				t += dt
+				if r.Float64() < 1.0-math.Exp(-lam*float64(v[len(v)-1])*dt) {
 					break
 				}
-				m += 1
 			}
-			infected := 1.0/float64(m)
-			// Draw an exponential random variable with rate lam*infected
-			t += r.ExpFloat64() / (lam * infected)
-		} else {
+
+		}  else {
 			// Draw an exponential random variable with rate 1.
 			t += r.ExpFloat64()
 		}
-		if t > T {
+
+		if t >= T {
 			break
 		}
+
 		times = append(times, t)
 		X = append(X, 1-X[len(X)-1])
 	}
+	fmt.Println(times)
+	fmt.Println(X)
 
 	return times, X
 }
 
 func RealizationTypicalDistr(T, lam float64, nu, dt float64, steps int) probutil.ContDistr {
 	f := func() ([]float64, matutil.Vec) {
-		return MeanFieldRealization(T,lam,nu)
+		return MeanFieldRealization(T,lam,nu,dt)
 	}
 	return probutil.TypicalContDistrSync(f, dt, T, 2, steps)
 }

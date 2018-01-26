@@ -43,7 +43,7 @@ func TypicalContDistrSync(
 			curr_time := 0.0
 			for i := 0; i < length; i++ {
 				for curr_index < len(times) - 1 && 
-				times[curr_index+1] < curr_time {
+				times[curr_index+1] <= curr_time {
 					curr_index += 1
 				}
 				cdistr[i][X[curr_index]] += inc

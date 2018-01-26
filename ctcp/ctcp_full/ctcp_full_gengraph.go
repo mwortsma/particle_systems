@@ -43,7 +43,7 @@ func GraphRealization(
 		event_index, time_inc := ctmc.StepCTMC(rates)
 		chosen_event := events[event_index]
 		t += time_inc
-		if t > T {
+		if t >= T {
 			break
 		}
 		times = append(times, t)
