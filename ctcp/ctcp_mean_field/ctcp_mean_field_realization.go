@@ -1,7 +1,7 @@
 package ctcp_mean_field
 
 import (
-	"fmt"
+	//"fmt"
 	"github.com/mwortsma/particle_systems/probutil"
 	"github.com/mwortsma/particle_systems/matutil"
 	"golang.org/x/exp/rand"
@@ -33,10 +33,15 @@ func MeanFieldRealization(
 	for t < T {
 		if X[len(X)-1] == 0 {
 
-			for t <= T - dt {
-				_, v := MeanFieldRealization(t, lam, nu, dt)
+			for {
 				t += dt
+				if t >= T {
+					return times, X
+				}
+				_, v := MeanFieldRealization(t, lam, nu, dt)
 				if r.Float64() < 1.0-math.Exp(-lam*float64(v[len(v)-1])*dt) {
+					times = append(times, t)
+					X = append(X, 1)
 					break
 				}
 			}
@@ -44,17 +49,14 @@ func MeanFieldRealization(
 		}  else {
 			// Draw an exponential random variable with rate 1.
 			t += r.ExpFloat64()
+			if t >= T {
+				return times, X
+			}
+			times = append(times, t)
+			X = append(X, 0)
 		}
 
-		if t >= T {
-			break
-		}
-
-		times = append(times, t)
-		X = append(X, 1-X[len(X)-1])
 	}
-	fmt.Println(times)
-	fmt.Println(X)
 
 	return times, X
 }

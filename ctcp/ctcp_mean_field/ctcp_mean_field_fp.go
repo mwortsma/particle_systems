@@ -82,6 +82,7 @@ func evolveSystem(
 					if t >= T - f.Dt {
 						return times, X
 					} else if r.Float64() < 1.0-math.Exp(-lam*f.Distr[int(t/f.Dt)][1]*f.Dt) {
+						// the line above maybe should be changed because of limits. TODO
 						t += f.Dt
 						break
 					}
