@@ -21,10 +21,10 @@ func MeanFieldFixedPointIteration(
 	dist probutil.ContDistance) probutil.ContDistr {
 
 
+	r := rand.New(rand.NewSource(uint64(time.Now().UnixNano())))
+
 	f := probutil.ContDistr{T: T, Dt: dt}
 	for iter := 0; iter < iters; iter++ {
-		
-		r := rand.New(rand.NewSource(uint64(time.Now().UnixNano())))
 
 		evolve_function := func()([]float64, matutil.Vec) {
 			return evolveSystem(T, lam, nu, f, dt, r)

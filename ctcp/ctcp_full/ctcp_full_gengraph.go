@@ -15,14 +15,14 @@ func GraphRealization(
 	lam float64,
 	nu float64, 
 	G graphutil.Graph,
-	k int) ([]float64, matutil.Mat) {
+	k int,
+	r *rand.Rand) ([]float64, matutil.Mat) {
 
 	n := len(G)
 	X := make([][]int, 1)
 	X[0] = make([]int, n)
 
-	// Ger random number to be used throughout
-	r := rand.New(rand.NewSource(uint64(time.Now().UnixNano())))
+
 
 	// keep track of times
 	times := make([]float64, 1)
@@ -56,18 +56,20 @@ func GraphRealization(
 	return times, X
 }
 
-func RingRealization(T float64, lam float64, nu float64, n int) ([]float64, matutil.Mat) {
-	return GraphRealization(T, lam, nu, graphutil.Ring(n), 2)
+func RingRealization(T float64, lam float64, nu float64, n int, r *rand.Rand) ([]float64, matutil.Mat) {
+	return GraphRealization(T, lam, nu, graphutil.Ring(n), 2, r)
 }
 
-func CompleteRealization(T float64, lam float64, nu float64, n int) ([]float64, matutil.Mat) {
-	return GraphRealization(T, lam, nu, graphutil.Complete(n), n-1)
+func CompleteRealization(T float64, lam float64, nu float64, n int, r *rand.Rand) ([]float64, matutil.Mat) {
+	return GraphRealization(T, lam, nu, graphutil.Complete(n), n-1, r)
 }
 
 func RingTypicalDistr(T float64, lam float64, nu, dt float64, n, steps int) probutil.ContDistr {
 	fmt.Println("Running ctcp Full Ring n =", n)
+	// Ger random number to be used throughout
+	r := rand.New(rand.NewSource(uint64(time.Now().UnixNano())))
 	f := func() ([]float64, matutil.Vec) {
-		times, X := RingRealization(T, lam, nu, n)
+		times, X := RingRealization(T, lam, nu, n,r)
 		return times, X.Col(0)
 	}
 	return probutil.TypicalContDistrSync(f, dt, T, 2, steps)
@@ -75,8 +77,10 @@ func RingTypicalDistr(T float64, lam float64, nu, dt float64, n, steps int) prob
 
 func CompleteTypicalDistr(T float64, lam float64, nu, dt float64, n, steps int) probutil.ContDistr {
 	fmt.Println("Running ctcp Full Complete n =", n)
+	// Ger random number to be used throughout
+	r := rand.New(rand.NewSource(uint64(time.Now().UnixNano())))
 	f := func() ([]float64, matutil.Vec) {
-		times, X := CompleteRealization(T, lam, nu, n)
+		times, X := CompleteRealization(T, lam, nu, n,r)
 		return times, X.Col(0)
 	}
 	return probutil.TypicalContDistrSync(f, dt, T, 2, steps)

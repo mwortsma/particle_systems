@@ -1,29 +1,12 @@
 # Particle Systems
 A study of particle systems.
 
-Discrete Time Load Balancing
-	
-	- Not Yet Implemented: Full regular trees
-	
-	- TODO
-		
-		Convert mean field to fixed point algorithm.
+TODO:
 
-Discrete Time Contact Process:
+General
 
-	- TODO
+- Fix rand.Rand bug (threadsafe?)
 
-		Convert mean field to fixed point algorithm.
+CTCP
 
-
-Plotutil
-	
-	- Fix the green color.
-	
-	- Add more colors.
-
-Bugs
-
-	- DTLB Mean Field
-	
-	- DTCP Mean Field
+- Fix bug in mean field fixed point (dipping ~ T = 3)

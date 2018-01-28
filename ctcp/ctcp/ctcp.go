@@ -29,14 +29,13 @@ func main() {
 	// -iters=x (for the fixed point algorithm, how many iterations to run)
 	// -eps=x (threshold distance between typical particle distributions)
 
-	// Types:
-
-	// 1. Full Simulations
-	// // 1.1 Ring (full_ring)
+	// Types: TODO
 
 	// Defining the arguments.
 	full_ring := flag.Bool("full_ring", false, "Full sim on the ring")
 	full_complete := flag.Bool("full_complete", false, "Full sim on the complete graph")
+	full_regtree := flag.Bool("full_regtree", false, "Full sim on a regular tree")
+
 
 	mean_field_fp := flag.Bool("mean_field_fp", false, "Mean Field fp simulation.")
 	mean_field_realization := flag.Bool("mean_field_realization", false, "Mean Field realization.")
@@ -47,6 +46,9 @@ func main() {
 	lam := flag.Float64("lam", 0.8, "incoming rate at each node")
 	dt := flag.Float64("dt", 0.25, "How to discritize time.")
 	nu := flag.Float64("nu", 0.5, "P(X_0 = 1)")
+
+	depth := flag.Int("depth", 3, "Depth of tree")
+	d := flag.Int("d", 3, "Degree of tree")
 	steps := flag.Int("steps", 100, "how many samples used in generating the empirical distribtuion")
 	var file_str string
 	flag.StringVar(&file_str, "file", "", "where to save the distribution.")
@@ -68,8 +70,10 @@ func main() {
 	case *full_complete:
 		distr = ctcp_full.CompleteTypicalDistr(*T, *lam, *nu, *dt, *n, *steps)
 
+	case *full_regtree:
+		distr = ctcp_full.RegTreeTypicalDistr(*depth, *T, *lam, *d, *nu , *dt, *steps)
+
 	case *mean_field_fp:
-		// e.g. python main.py -show_plot -commands="ctcp -mean_field_fp -iters=10 -dt=0.1 -steps=100000 -epsilon=0.01" -type="continuous" -labels="fp"
 		distr = ctcp_mean_field.MeanFieldFixedPointIteration(
 			*T,*lam,*nu,*dt,*eps,*iters,*steps,probutil.ContL1Distance)
 

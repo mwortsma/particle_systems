@@ -20,7 +20,7 @@ func GetCPRatesAndEvents(
 			rates = append(rates, 1)
 			events = append(events, Event{Index: i, Inc: -1})
 
-			for j := range(G[i]) {
+			for _, j := range(G[i]) {
 				if X[j] == 0 {
 					// infect
 					rates = append(rates, lam/float64(k))
