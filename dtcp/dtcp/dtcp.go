@@ -51,8 +51,11 @@ func main() {
 	full_complete := flag.Bool("full_complete", false, "Full sim on the complete graph")
 	full_tree := flag.Bool("full_tree", false, "Full sim on a regular tree")
 
-	local_ring := flag.Bool("local_ring", false, "Local sim on the ring")
-	local_tree := flag.Bool("local_tree", false, "Local sim on a regular tree")
+	local_ring_fp := flag.Bool("local_ring_fp", false, "Local sim on the ring")
+	local_tree_fp := flag.Bool("local_tree_fp", false, "Local sim on a regular tree")
+
+	local_ring_realization := flag.Bool("local_ring_realization", false, "Local sim on the ring")
+	local_tree_realization := flag.Bool("local_tree_realization", false, "Local sim on a regular tree")
 
 	mean_field := flag.Bool("mean_field", false, "Mean Field simulation.")
 
@@ -97,11 +100,17 @@ func main() {
 	case *full_tree:
 		distr = dtcp_full.RegTreeTypicalDistr(*T, *d, *p, *q, *nu, *steps)
 
-	case *local_ring:
+	case *local_ring_fp:
 		_, distr, _, _ = dtcp_local.RegTreeFixedPointIteration(*T,2,*p,*q,*nu,*eps,*iters,*steps,dist)	
 
-	case *local_tree:
-		_, distr, _, _ = dtcp_local.RegTreeFixedPointIteration(*T,*d,*p,*q,*nu,*eps,*iters,*steps,dist)			
+	case *local_tree_fp:
+		_, distr, _, _ = dtcp_local.RegTreeFixedPointIteration(*T,*d,*p,*q,*nu,*eps,*iters,*steps,dist)		
+
+	case *local_ring_realization:
+		distr = dtcp_local.LocalRegTreeRealizationTypicalDistr(*T, 2, *p, *q, *nu, *steps)
+
+	case *local_tree_realization:
+		distr = dtcp_local.LocalRegTreeRealizationTypicalDistr(*T, *d, *p, *q, *nu, *steps)	
 
 	case *mean_field:
 		distr = dtcp_mean_field.TypicalDistr(*T, *p, *q, *nu, *d, *steps)

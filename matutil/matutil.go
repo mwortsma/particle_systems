@@ -68,6 +68,15 @@ func (mat Mat) Colst(cols []int, row int) Vec {
 	return v
 }
 
+func (mat Mat) Match(cols []int, vals Mat, r int) bool {
+	for i, c := range(cols) {
+		if mat[r][c] != vals[r][i] {
+			return false
+		}
+	}
+	return true
+}
+
 func (mat Mat) Dims() (int, int) {
 	return len(mat), len(mat[0])
 }
