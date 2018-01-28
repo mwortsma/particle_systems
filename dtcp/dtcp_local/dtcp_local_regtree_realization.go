@@ -27,7 +27,7 @@ func LocalRegTreeRealization(T, d int, p, q float64, nu float64, match_cols []in
 	for t := 1; t < T; t++ {
 		// Copy the state of X[t-1] to X[t]
 		copy(X[t], X[t-1])
-		
+
 		// update the root.
 		if X[t-1][0] == 0 {
 			sum_neighbors := 0
@@ -51,18 +51,16 @@ func LocalRegTreeRealization(T, d int, p, q float64, nu float64, match_cols []in
 
 				var Y matutil.Mat
 				var b bool
-				rec_match_cols := []int{0,i}
-				rec_match_vals := X.ColsT([]int{i,0}, t)
+				rec_match_cols := []int{i, 0}
+				rec_match_vals := X.ColsT([]int{0, i}, t)
 
 				for !b {
 					Y, b = LocalRegTreeRealization(t, d, p, q, nu, rec_match_cols, rec_match_vals, r)
 				}
 
 				sum_neighbors := 0
-				for j := 0; j < d+1; j++ {
-					if j != i {
-						sum_neighbors += Y[t-1][j]
-					}
+				for j := 1; j < d+1; j++ {
+					sum_neighbors += Y[t-1][j]
 				}
 
 				if r.Float64() < (p/float64(d))*float64(sum_neighbors) {
@@ -77,7 +75,6 @@ func LocalRegTreeRealization(T, d int, p, q float64, nu float64, match_cols []in
 			}
 		}
 
-
 		if !X.Match(match_cols, match_vals, t) {
 			return [][]int{}, false
 		}
@@ -86,12 +83,11 @@ func LocalRegTreeRealization(T, d int, p, q float64, nu float64, match_cols []in
 	return X, true
 }
 
-
 func LocalRegTreeRealizationTypicalDistr(T, d int, p, q float64, nu float64, steps int) probutil.Distr {
 	r := rand.New(rand.NewSource(uint64(time.Now().UnixNano())))
-	f := func() (fmt.Stringer) {
+	f := func() fmt.Stringer {
 		X, _ := LocalRegTreeRealization(T, d, p, q, nu, nil, nil, r)
-		return X.Col(0)
+		return X.Col(1)
 	}
 	return probutil.TypicalDistr(f, steps)
 }

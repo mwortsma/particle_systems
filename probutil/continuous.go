@@ -2,33 +2,33 @@ package probutil
 
 import (
 	//"fmt"
-	"sync"
-	"math"
 	"github.com/mwortsma/particle_systems/matutil"
+	"math"
+	"sync"
 )
 
 type ContDistr struct {
-	Dt float64
-	T float64
-	K int
+	Dt    float64
+	T     float64
+	K     int
 	Distr [][]float64
 }
 type ContDistance func(ContDistr, ContDistr) float64
 
 func TypicalContDistrSync(
-	f func()([]float64, matutil.Vec), 
-	dt float64, 
+	f func() ([]float64, matutil.Vec),
+	dt float64,
 	T float64,
 	k int,
 	steps int) ContDistr {
 
-	length := int(float64(T)/dt)
+	length := int(float64(T) / dt)
 	cdistr := make([][]float64, length)
 	for i := 0; i < length; i++ {
 		cdistr[i] = make([]float64, k)
 	}
 
-	inc := 1.0/float64(steps)
+	inc := 1.0 / float64(steps)
 
 	var mutex = &sync.Mutex{}
 	var wg sync.WaitGroup
@@ -43,8 +43,8 @@ func TypicalContDistrSync(
 			curr_index := 0
 			curr_time := 0.0
 			for i := 0; i < length; i++ {
-				for curr_index < len(times) - 1 && 
-				times[curr_index+1] <= curr_time {
+				for curr_index < len(times)-1 &&
+					times[curr_index+1] <= curr_time {
 					curr_index += 1
 				}
 				cdistr[i][X[curr_index]] += inc
@@ -59,19 +59,19 @@ func TypicalContDistrSync(
 }
 
 func TypicalContDistr(
-	f func()([]float64, matutil.Vec), 
-	dt float64, 
+	f func() ([]float64, matutil.Vec),
+	dt float64,
 	T float64,
 	k int,
 	steps int) ContDistr {
 
-	length := int(float64(T)/dt)
+	length := int(float64(T) / dt)
 	cdistr := make([][]float64, length)
 	for i := 0; i < length; i++ {
 		cdistr[i] = make([]float64, k)
 	}
 
-	inc := 1.0/float64(steps)
+	inc := 1.0 / float64(steps)
 
 	for step := 0; step < steps; step++ {
 
@@ -80,8 +80,8 @@ func TypicalContDistr(
 		curr_index := 0
 		curr_time := 0.0
 		for i := 0; i < length; i++ {
-			for curr_index < len(times) - 1 && 
-			times[curr_index+1] <= curr_time {
+			for curr_index < len(times)-1 &&
+				times[curr_index+1] <= curr_time {
 				curr_index += 1
 			}
 			cdistr[i][X[curr_index]] += inc

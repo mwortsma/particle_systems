@@ -9,13 +9,13 @@ import (
 )
 
 type node struct {
-	children []*node
-	parent   *node
-	state    matutil.Vec
-	times 	 []float64
-	is_leaf  bool
-	is_root  bool
-	id int
+	children      []*node
+	parent        *node
+	state         matutil.Vec
+	times         []float64
+	is_leaf       bool
+	is_root       bool
+	id            int
 	num_neighbors int
 }
 
@@ -42,7 +42,7 @@ func RegTreeRealization(depth int, T, lam float64, d int, nu float64, r *rand.Ra
 	return root.times, root.state
 }
 
-func RegTreeTypicalDistr(depth int, T, lam float64, d int, nu float64,  dt float64, steps int) probutil.ContDistr {
+func RegTreeTypicalDistr(depth int, T, lam float64, d int, nu float64, dt float64, steps int) probutil.ContDistr {
 	r := rand.New(rand.NewSource(uint64(time.Now().UnixNano())))
 	f := func() ([]float64, matutil.Vec) {
 		return RegTreeRealization(depth, T, lam, d, nu, r)
@@ -110,25 +110,24 @@ func (n *node) transition(t float64, e ctmc.Event) bool {
 		return false
 	}
 	n.times = append(n.times, t)
-	n.state = append(n.state, n.state[len(n.state)-1] + e.Inc)
+	n.state = append(n.state, n.state[len(n.state)-1]+e.Inc)
 	return true
 }
 
-
 func GetCPTreeRatesAndEvents(
-	n *node, 
+	n *node,
 	lam float64) ([]float64, []ctmc.Event) {
 
 	rates := make([]float64, 0)
 	events := make([]ctmc.Event, 0)
 
-	if n.state[len(n.state) - 1] == 1 {
+	if n.state[len(n.state)-1] == 1 {
 		// recover
 		rates = append(rates, 1)
 		events = append(events, ctmc.Event{Index: n.id, Inc: -1})
 
 		for _, c := range n.children {
-			if c.state[len(c.state) - 1] == 0 {
+			if c.state[len(c.state)-1] == 0 {
 				// infect
 				rates = append(rates, lam/float64(c.num_neighbors))
 				events = append(events, ctmc.Event{Index: c.id, Inc: 1})
@@ -136,7 +135,7 @@ func GetCPTreeRatesAndEvents(
 		}
 	} else {
 		for _, c := range n.children {
-			if c.state[len(c.state) - 1] == 1 {
+			if c.state[len(c.state)-1] == 1 {
 				// infect
 				rates = append(rates, lam/float64(n.num_neighbors))
 				events = append(events, ctmc.Event{Index: n.id, Inc: 1})
@@ -152,4 +151,3 @@ func GetCPTreeRatesAndEvents(
 
 	return rates, events
 }
-

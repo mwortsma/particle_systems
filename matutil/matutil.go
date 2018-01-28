@@ -69,7 +69,7 @@ func (mat Mat) Colst(cols []int, row int) Vec {
 }
 
 func (mat Mat) Match(cols []int, vals Mat, r int) bool {
-	for i, c := range(cols) {
+	for i, c := range cols {
 		if mat[r][c] != vals[r][i] {
 			return false
 		}

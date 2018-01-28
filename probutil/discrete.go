@@ -7,7 +7,6 @@ import (
 	"sync"
 )
 
-
 // Distr, distance used for discrete time
 type Distr map[string]float64
 type Distance func(Distr, Distr) float64
@@ -71,7 +70,6 @@ func L1Distance(d1, d2 Distr) (dist float64) {
 	}
 	return
 }
-
 
 // Depricated
 func SharedSortedKeys(distrs []Distr) []string {

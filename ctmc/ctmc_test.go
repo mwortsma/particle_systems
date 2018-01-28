@@ -15,5 +15,5 @@ func TestCTMC(t *testing.T) {
 		pops[e] += 1
 	}
 	t.Log(pops)
-	t.Log(float64(s)/float64(iters))
+	t.Log(float64(s) / float64(iters))
 }

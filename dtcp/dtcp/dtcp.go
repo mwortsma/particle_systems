@@ -1,13 +1,13 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/mwortsma/particle_systems/dtcp/dtcp_local"
 	"github.com/mwortsma/particle_systems/dtcp/dtcp_full"
+	"github.com/mwortsma/particle_systems/dtcp/dtcp_local"
 	"github.com/mwortsma/particle_systems/dtcp/dtcp_mean_field"
 	"github.com/mwortsma/particle_systems/probutil"
-	"encoding/json"
 	"io/ioutil"
 )
 
@@ -38,7 +38,7 @@ func main() {
 	// // 1.2 Complete (dtcp -full_complete -n=?)
 	// // 1.3 Regular Tree (dtcp -full_tree -d=3 -depth=?)
 	// // // Note: Depth optional. Defaults to T.
-	
+
 	// 2. Local Simulations (Using the fixed point algorithm)
 	// // 1.1 Ring (dtcp -local_ring)
 	// // 1.2 Regular Tree (dtcp -regular_tree -d=3)
@@ -57,7 +57,8 @@ func main() {
 	local_ring_realization := flag.Bool("local_ring_realization", false, "Local sim on the ring")
 	local_tree_realization := flag.Bool("local_tree_realization", false, "Local sim on a regular tree")
 
-	mean_field := flag.Bool("mean_field", false, "Mean Field simulation.")
+	mean_field_realization := flag.Bool("mean_field_realization", false, "Mean Field simulation.")
+	mean_field_fp := flag.Bool("mean_field_fp", false, "Mean Field fixed point simulation.")
 
 	d := flag.Int("d", -1, "degree of a noe")
 	n := flag.Int("n", -1, "number of nodes")
@@ -101,19 +102,22 @@ func main() {
 		distr = dtcp_full.RegTreeTypicalDistr(*T, *d, *p, *q, *nu, *steps)
 
 	case *local_ring_fp:
-		_, distr, _, _ = dtcp_local.RegTreeFixedPointIteration(*T,2,*p,*q,*nu,*eps,*iters,*steps,dist)	
+		_, distr, _, _ = dtcp_local.RegTreeFixedPointIteration(*T, 2, *p, *q, *nu, *eps, *iters, *steps, dist)
 
 	case *local_tree_fp:
-		_, distr, _, _ = dtcp_local.RegTreeFixedPointIteration(*T,*d,*p,*q,*nu,*eps,*iters,*steps,dist)		
+		_, distr, _, _ = dtcp_local.RegTreeFixedPointIteration(*T, *d, *p, *q, *nu, *eps, *iters, *steps, dist)
 
 	case *local_ring_realization:
 		distr = dtcp_local.LocalRegTreeRealizationTypicalDistr(*T, 2, *p, *q, *nu, *steps)
 
 	case *local_tree_realization:
-		distr = dtcp_local.LocalRegTreeRealizationTypicalDistr(*T, *d, *p, *q, *nu, *steps)	
+		distr = dtcp_local.LocalRegTreeRealizationTypicalDistr(*T, *d, *p, *q, *nu, *steps)
 
-	case *mean_field:
-		distr = dtcp_mean_field.TypicalDistr(*T, *p, *q, *nu, *d, *steps)
+	case *mean_field_realization:
+		distr = dtcp_mean_field.RealizationTypicalDistr(*T, *p, *q, *nu, *steps)
+
+	case *mean_field_fp:
+		distr = dtcp_mean_field.MeanFieldFixedPointIteration(*T, *p, *q, *nu, *eps, *iters, *steps, dist)
 	}
 
 	b, err := json.Marshal(distr)
@@ -129,5 +133,5 @@ func main() {
 			panic(err)
 		}
 	}
-		
+
 }

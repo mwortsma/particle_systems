@@ -1,13 +1,13 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/mwortsma/particle_systems/dtlb/dtlb_local"
 	"github.com/mwortsma/particle_systems/dtlb/dtlb_full"
+	"github.com/mwortsma/particle_systems/dtlb/dtlb_local"
 	"github.com/mwortsma/particle_systems/dtlb/dtlb_mean_field"
 	"github.com/mwortsma/particle_systems/probutil"
-	"encoding/json"
 	"io/ioutil"
 )
 
@@ -35,7 +35,7 @@ func main() {
 	// // 1.1 Ring (full_ring)
 	// // // Note: Depth optional. Defaults to 1+4*T.
 	// // 1.2 Complete (dtlb -full_complete -n=?)
-	
+
 	// 2. Local Simulations (Using the fixed point algorithm)
 	// // 1.1 Ring (dtlb -local_ring)
 
@@ -88,7 +88,7 @@ func main() {
 		distr = dtlb_full.CompleteTypicalDistr(*T, *lam, *k, *n, *steps)
 
 	case *local_ring:
-		_, distr, _, _ = dtlb_local.RingFixedPointIteration(*T,*lam,*k,*eps,*iters,*steps,dist)	
+		_, distr, _, _ = dtlb_local.RingFixedPointIteration(*T, *lam, *k, *eps, *iters, *steps, dist)
 
 	case *mean_field:
 		distr = dtlb_mean_field.TypicalDistr(*T, *lam, *k, *d, *steps)
@@ -107,5 +107,5 @@ func main() {
 			panic(err)
 		}
 	}
-		
+
 }

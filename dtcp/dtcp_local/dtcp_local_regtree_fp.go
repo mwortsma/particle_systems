@@ -71,7 +71,7 @@ func ringStep(
 	for step := 0; step < steps; step++ {
 		go func() {
 			defer wg.Done()
-			X, cond_missed := treeRealization(T, d,p,q,nu, old_cond)
+			X, cond_missed := treeRealization(T, d, p, q, nu, old_cond)
 			// update joint, typical
 			rest_mutex.Lock()
 			cond_misses += cond_missed
@@ -81,7 +81,7 @@ func ringStep(
 			// now update cond
 			cond_mutex.Lock()
 			for i := 1; i < d+1; i++ {
-				key := X.Cols([]int{0,i})
+				key := X.Cols([]int{0, i})
 				for t := 1; t < T; t++ {
 					keyt := key[:t].String()
 					sum_neighbors := 0
@@ -136,7 +136,7 @@ func treeRealization(T, d int, p, q float64, nu float64, cond CondDistr) (matuti
 	for t := 1; t < T; t++ {
 		// Copy the state of X[t-1] to X[t]
 		copy(X[t], X[t-1])
-		
+
 		// update the root.
 		if X[t-1][0] == 0 {
 			sum_neighbors := 0
@@ -157,8 +157,8 @@ func treeRealization(T, d int, p, q float64, nu float64, cond CondDistr) (matuti
 		// update the rest of the neighbors.
 		for i := 1; i < d+1; i++ {
 			if X[t-1][i] == 0 {
-				
-				key := X.ColsT([]int{i,0},t).String()
+
+				key := X.ColsT([]int{i, 0}, t).String()
 				sum_neighbors := X[t-1][0]
 
 				if distr, ok := cond[t-1][key]; ok {

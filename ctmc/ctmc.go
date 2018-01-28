@@ -5,9 +5,9 @@ import (
 	"time"
 )
 
-type Event struct{
+type Event struct {
 	Index int
-	Inc int
+	Inc   int
 }
 
 // StepCTMC takes in an array of rates where a rate corresponds to event.
@@ -20,24 +20,24 @@ func StepCTMC(rates []float64) (event int, time_inc float64) {
 	r := rand.New(rand.NewSource(uint64(time.Now().UnixNano())))
 	// get the sum of the rates
 	sum_rates := 0.0
-	for _, rate := range(rates) {
+	for _, rate := range rates {
 		sum_rates += rate
 	}
 	// get a scaled version of the rates which sums to one
 	scaled_rates := make([]float64, len(rates))
-	for i, rate := range(rates) {
-		scaled_rates[i] = rate/sum_rates
+	for i, rate := range rates {
+		scaled_rates[i] = rate / sum_rates
 	}
 	// draw a time ~ exp(sum_rates)
 	time_inc = r.ExpFloat64() / sum_rates
 	// choose an event with probability proportional to the rate
 	rand := r.Float64()
 	cumsum := 0.0
-	for i, rate := range(scaled_rates){
+	for i, rate := range scaled_rates {
 		cumsum += rate
 		if cumsum > rand {
 			event = i
-			break 
+			break
 		}
 	}
 	return event, time_inc

@@ -1,3 +1,6 @@
+package depricated
+
+/*
 package main
 
 // cmd is depricated. TODO delete.
@@ -172,7 +175,7 @@ func main() {
 		if *local_tree {
 			name := fmt.Sprintf("Local (Tree) d=%d", *d)
 			fmt.Println("Running", name)
-			_,local_tree_distr,_,_ := dtcp_local.RegTreeFixedPointIteration(*T,*d,*p,*q,*nu,*eps,*iters,*steps,dist)			
+			_,local_tree_distr,_,_ := dtcp_local.RegTreeFixedPointIteration(*T,*d,*p,*q,*nu,*eps,*iters,*steps,dist)
 			distrs = append(distrs, local_tree_distr)
 			labels = append(labels, name)
 		}
@@ -210,4 +213,4 @@ func main() {
 	file := "plots/" + strings.Replace(title, " ", "_", -1) + ".png"
 	plotutil.PlotDistr(file, title, distrs, labels)
 }
-
+*/
