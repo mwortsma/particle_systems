@@ -46,7 +46,8 @@ func main() {
 	full_ring := flag.Bool("full_ring", false, "Full sim on the ring")
 	full_complete := flag.Bool("full_complete", false, "Full sim on the complete graph")
 
-	local_ring := flag.Bool("local_ring", false, "Local sim on the ring")
+	local_ring_fp := flag.Bool("local_ring_fp", false, "Local sim fixed point on the ring")
+	local_ring_realization := flag.Bool("local_ring_realization", false, "Local sim realization on the ring")
 
 	mean_field := flag.Bool("mean_field", false, "Mean Field simulation.")
 
@@ -87,8 +88,11 @@ func main() {
 	case *full_complete:
 		distr = dtlb_full.CompleteTypicalDistr(*T, *lam, *k, *n, *steps)
 
-	case *local_ring:
+	case *local_ring_fp:
 		_, distr, _, _ = dtlb_local.RingFixedPointIteration(*T, *lam, *k, *eps, *iters, *steps, dist)
+
+	case *local_ring_realization:
+		distr = dtlb_local.LocalRingRealizationTypicalDistr(*T, *lam, *k, *steps)
 
 	case *mean_field:
 		distr = dtlb_mean_field.TypicalDistr(*T, *lam, *k, *d, *steps)
