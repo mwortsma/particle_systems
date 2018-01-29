@@ -34,11 +34,13 @@ func RegTreeRealization(T, d int, p, q float64, k int, init func() int, r *rand.
 }
 
 func RegTreeTypicalDistr(T, d int, lam float64, dt float64, k int, steps int) probutil.Distr {
-	p := 0.0
-	q := 0.0
-	init := func() int { return 0 }
-	// Ger random nummber to be used throughout
+	
 	r := rand.New(rand.NewSource(uint64(time.Now().UnixNano())))
+
+	p := 1.0-math.Exp(-dt*lam)
+	q := 1.0-math.Exp(-dt)
+	init := func() int { return init_with_arguments(p,q,k,r) }
+	// Ger random nummber to be used throughout
 	f := func() fmt.Stringer {
 		return RegTreeRealization(T, d, p,q,k,init,r)
 	}
