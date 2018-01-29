@@ -2,10 +2,10 @@ package dtlb_local
 
 import (
 	"fmt"
+	"github.com/mwortsma/particle_systems/dtlb/dtlb_util"
 	"github.com/mwortsma/particle_systems/graphutil"
 	"github.com/mwortsma/particle_systems/matutil"
 	"github.com/mwortsma/particle_systems/probutil"
-	"github.com/mwortsma/particle_systems/dtlb/dtlb_util"
 	"golang.org/x/exp/rand"
 	"sync"
 	"time"
@@ -29,17 +29,17 @@ func RingFixedPointIteration(
 
 	fmt.Println("Running dtlb ring local T = ", T)
 
-		// Ger random number to be used throughout
+	// Ger random number to be used throughout
 	r := rand.New(rand.NewSource(uint64(time.Now().UnixNano())))
 
 	joint, cond, typical := make(probutil.Distr), initCond(T), make(probutil.Distr)
 	joint_dists := make([]float64, 0)
 	typical_dists := make([]float64, 0)
 
-	p,q := dtlb_util.GetPQ(lam,dt)
+	p, q := dtlb_util.GetPQ(lam, dt)
 
 	for iter := 0; iter < iters; iter++ {
-		new_joint, new_cond, new_typical, cond_misses := ringStep(T, p,q, k, steps, cond,r)
+		new_joint, new_cond, new_typical, cond_misses := ringStep(T, p, q, k, steps, cond, r)
 		joint_dist := dist(joint, new_joint)
 		joint_dists = append(joint_dists, joint_dist)
 		typical_dist := dist(typical, new_typical)
@@ -56,7 +56,7 @@ func RingFixedPointIteration(
 
 func ringStep(
 	T int,
-	p,q float64,
+	p, q float64,
 	k int,
 	steps int,
 	old_cond CondDistr,
@@ -80,7 +80,7 @@ func ringStep(
 	for step := 0; step < steps; step++ {
 		go func() {
 			defer wg.Done()
-			X, cond_missed := ringRealization(T, p,q, k, old_cond, r)
+			X, cond_missed := ringRealization(T, p, q, k, old_cond, r)
 			// update joint, typical
 			rest_mutex.Lock()
 			cond_misses += cond_missed
@@ -123,7 +123,7 @@ func ringStep(
 	return joint, cond, typical, cond_misses
 }
 
-func ringRealization(T int, p,q float64, k int, cond CondDistr, r *rand.Rand) (matutil.Mat, int) {
+func ringRealization(T int, p, q float64, k int, cond CondDistr, r *rand.Rand) (matutil.Mat, int) {
 	// n is how many nodes we need to keep track of.
 	cond_misses := 0
 	n := 11
@@ -131,7 +131,7 @@ func ringRealization(T int, p,q float64, k int, cond CondDistr, r *rand.Rand) (m
 	X := matutil.Create(T, n)
 
 	for i := 0; i < n; i++ {
-		X[0][i] = dtlb_util.Init(p,q,k,r)
+		X[0][i] = dtlb_util.Init(p, q, k, r)
 	}
 
 	for t := 1; t < T; t++ {
@@ -152,7 +152,7 @@ func ringRealization(T int, p,q float64, k int, cond CondDistr, r *rand.Rand) (m
 			} else {
 				// TODO
 				cond_misses++
-				X[t-1][0], X[t-1][1] = dtlb_util.Init(p,q,k,r), dtlb_util.Init(p,q,k,r)
+				X[t-1][0], X[t-1][1] = dtlb_util.Init(p, q, k, r), dtlb_util.Init(p, q, k, r)
 			}
 		}
 
@@ -165,7 +165,7 @@ func ringRealization(T int, p,q float64, k int, cond CondDistr, r *rand.Rand) (m
 			} else {
 				// TODO
 				cond_misses++
-				X[t-1][9], X[t-1][10] = dtlb_util.Init(p,q,k,r), dtlb_util.Init(p,q,k,r)
+				X[t-1][9], X[t-1][10] = dtlb_util.Init(p, q, k, r), dtlb_util.Init(p, q, k, r)
 			}
 		}
 

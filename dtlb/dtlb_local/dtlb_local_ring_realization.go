@@ -2,22 +2,22 @@ package dtlb_local
 
 import (
 	"fmt"
+	"github.com/mwortsma/particle_systems/dtlb/dtlb_util"
 	"github.com/mwortsma/particle_systems/graphutil"
 	"github.com/mwortsma/particle_systems/matutil"
 	"github.com/mwortsma/particle_systems/probutil"
-	"github.com/mwortsma/particle_systems/dtlb/dtlb_util"
 	"golang.org/x/exp/rand"
 	"time"
 )
 
-func LocalRingRealization(T int, p,q float64, k int, match_cols []int, match_vals matutil.Mat, r *rand.Rand) (matutil.Mat, bool) {
+func LocalRingRealization(T int, p, q float64, k int, match_cols []int, match_vals matutil.Mat, r *rand.Rand) (matutil.Mat, bool) {
 	// n is how many nodes we need to keep track of.
 	n := 11
 	G := graphutil.Ring(n)
 	X := matutil.Create(T, n)
 
 	for i := 0; i < n; i++ {
-		X[0][i] = dtlb_util.Init(p,q,k,r)
+		X[0][i] = dtlb_util.Init(p, q, k, r)
 	}
 
 	for t := 1; t < T; t++ {
@@ -32,25 +32,25 @@ func LocalRingRealization(T int, p,q float64, k int, match_cols []int, match_val
 		if arrivals[1] || arrivals[2] {
 			// if there is an arrival at 1,2 we need to sample the conditional
 			left_match_vals := X.ColsT([]int{5, 4, 3, 2}, t)
-			left_match_cols := []int{2,3,4,5}
+			left_match_cols := []int{2, 3, 4, 5}
 			var Y_left matutil.Mat
 			var b_left bool
 
 			for !b_left {
-				Y_left, b_left = LocalRingRealization(t, p,q, k, left_match_cols, left_match_vals, r)
+				Y_left, b_left = LocalRingRealization(t, p, q, k, left_match_cols, left_match_vals, r)
 			}
 			X[t-1][0], X[t-1][1] = Y_left[t-1][5], Y_left[t-1][4]
 		}
 
 		if arrivals[8] || arrivals[9] {
 			// if there is an arrival at 1,2 we need to sample the conditional
-			right_match_vals := X.ColsT([]int{5,6,7,8}, t)
-			right_match_cols := []int{8,7,6,5}
+			right_match_vals := X.ColsT([]int{5, 6, 7, 8}, t)
+			right_match_cols := []int{8, 7, 6, 5}
 			var Y_right matutil.Mat
 			var b_right bool
 
 			for !b_right {
-				Y_right, b_right = LocalRingRealization(t, p,q, k, right_match_cols, right_match_vals, r)
+				Y_right, b_right = LocalRingRealization(t, p, q, k, right_match_cols, right_match_vals, r)
 			}
 			X[t-1][9], X[t-1][10] = Y_right[t-1][2], Y_right[t-1][1]
 		}
@@ -98,9 +98,9 @@ func LocalRingRealization(T int, p,q float64, k int, match_cols []int, match_val
 
 func LocalRingRealizationTypicalDistr(T int, lam, dt float64, k int, steps int) probutil.Distr {
 	r := rand.New(rand.NewSource(uint64(time.Now().UnixNano())))
-	p,q := dtlb_util.GetPQ(lam,dt)
+	p, q := dtlb_util.GetPQ(lam, dt)
 	f := func() fmt.Stringer {
-		X, _ := LocalRingRealization(T, p,q, k, nil, nil, r)
+		X, _ := LocalRingRealization(T, p, q, k, nil, nil, r)
 		return X.Col(3)
 	}
 	return probutil.TypicalDistr(f, steps)

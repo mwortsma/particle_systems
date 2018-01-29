@@ -2,9 +2,9 @@ package dtlb_full
 
 import (
 	"fmt"
+	"github.com/mwortsma/particle_systems/dtlb/dtlb_util"
 	"github.com/mwortsma/particle_systems/matutil"
 	"github.com/mwortsma/particle_systems/probutil"
-	"github.com/mwortsma/particle_systems/dtlb/dtlb_util"
 	"golang.org/x/exp/rand"
 	"time"
 )
@@ -17,13 +17,13 @@ type node struct {
 	is_root  bool
 }
 
-func RegTreeRealization(T, d int, lam,dt float64, k int, r *rand.Rand) matutil.Vec {
+func RegTreeRealization(T, d int, lam, dt float64, k int, r *rand.Rand) matutil.Vec {
 
 	// create tree
 	var root node
 	// TODO verify this depth
-	p,q := dtlb_util.GetPQ(lam,dt)
-	root.createNode(T, d, p,q,k,r, &node{}, 2*T-1, true)
+	p, q := dtlb_util.GetPQ(lam, dt)
+	root.createNode(T, d, p, q, k, r, &node{}, 2*T-1, true)
 
 	for t := 1; t < T; t++ {
 		// transition will be called for the whole tree recursively
@@ -33,12 +33,12 @@ func RegTreeRealization(T, d int, lam,dt float64, k int, r *rand.Rand) matutil.V
 	return root.state
 }
 
-func RegTreeTypicalDistr(T, d int, p,q float64, k int, steps int) probutil.Distr {
-	
+func RegTreeTypicalDistr(T, d int, p, q float64, k int, steps int) probutil.Distr {
+
 	r := rand.New(rand.NewSource(uint64(time.Now().UnixNano())))
 	// Ger random nummber to be used throughout
 	f := func() fmt.Stringer {
-		return RegTreeRealization(T, d, p,q,k,r)
+		return RegTreeRealization(T, d, p, q, k, r)
 	}
 	return probutil.TypicalDistr(f, steps)
 }
@@ -47,8 +47,8 @@ func RegTreeTypicalDistr(T, d int, p,q float64, k int, steps int) probutil.Distr
 func (n *node) createNode(
 	T int,
 	d int,
-	p,q float64,
-	k int, 
+	p, q float64,
+	k int,
 	r *rand.Rand,
 	parent *node,
 	depth int,
@@ -66,12 +66,12 @@ func (n *node) createNode(
 		n.children = make([]*node, d-1)
 		for c := 0; c < d-1; c++ {
 			var child node
-			child.createNode(T, d, p,q,k,r, n, depth-1, false)
+			child.createNode(T, d, p, q, k, r, n, depth-1, false)
 			n.children[c] = &child
 		}
 		if n.is_root {
 			var child node
-			child.createNode(T, d, p,q,k,r, n, depth-1, false)
+			child.createNode(T, d, p, q, k, r, n, depth-1, false)
 			n.children = append(n.children, &child)
 		}
 	}
@@ -80,15 +80,15 @@ func (n *node) createNode(
 	n.state = make(matutil.Vec, T)
 
 	// Initial conditions.
-	n.state[0] = dtlb_util.Init(p,q,k,r)
+	n.state[0] = dtlb_util.Init(p, q, k, r)
 }
 
-func (n *node) transition(t, d int, p,q float64, k int, r *rand.Rand) {
+func (n *node) transition(t, d int, p, q float64, k int, r *rand.Rand) {
 
 	n.state[t] = n.state[t-1]
 	// call transition on children
 	for _, c := range n.children {
-		c.transition(t, d, p,q,k,r)
+		c.transition(t, d, p, q, k, r)
 	}
 
 	// serve an item with probability q
@@ -132,5 +132,3 @@ func (n *node) transition(t, d int, p,q float64, k int, r *rand.Rand) {
 	}
 
 }
-
-

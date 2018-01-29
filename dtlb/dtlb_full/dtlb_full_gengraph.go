@@ -2,21 +2,21 @@ package dtlb_full
 
 import (
 	"fmt"
+	"github.com/mwortsma/particle_systems/dtlb/dtlb_util"
 	"github.com/mwortsma/particle_systems/graphutil"
 	"github.com/mwortsma/particle_systems/matutil"
 	"github.com/mwortsma/particle_systems/probutil"
-	"github.com/mwortsma/particle_systems/dtlb/dtlb_util"
 	"golang.org/x/exp/rand"
 	"time"
 )
 
-func GraphRealization(T int, p,q float64, k int, G graphutil.Graph, r *rand.Rand) matutil.Mat {
+func GraphRealization(T int, p, q float64, k int, G graphutil.Graph, r *rand.Rand) matutil.Mat {
 	n := len(G)
 	X := matutil.Create(T, n)
 
 	// Initial conditions.
 	for i := 0; i < n; i++ {
-		X[0][i] = dtlb_util.Init(p,q,k,r)
+		X[0][i] = dtlb_util.Init(p, q, k, r)
 	}
 
 	for t := 1; t < T; t++ {
@@ -59,12 +59,12 @@ func GraphRealization(T int, p,q float64, k int, G graphutil.Graph, r *rand.Rand
 	return X
 }
 
-func RingRealization(T int, p,q float64, k int, n int, r *rand.Rand) matutil.Mat {
-	return GraphRealization(T, p,q, k, graphutil.Ring(n), r)
+func RingRealization(T int, p, q float64, k int, n int, r *rand.Rand) matutil.Mat {
+	return GraphRealization(T, p, q, k, graphutil.Ring(n), r)
 }
 
-func CompleteRealization(T int, p,q float64, k int, n int, r *rand.Rand) matutil.Mat {
-	return GraphRealization(T, p,q, k, graphutil.Complete(n), r)
+func CompleteRealization(T int, p, q float64, k int, n int, r *rand.Rand) matutil.Mat {
+	return GraphRealization(T, p, q, k, graphutil.Complete(n), r)
 }
 
 func RingTypicalDistr(T int, lam, dt float64, k int, n, steps int) probutil.Distr {
@@ -72,11 +72,11 @@ func RingTypicalDistr(T int, lam, dt float64, k int, n, steps int) probutil.Dist
 	if n < 0 {
 		n = 1 + 4*T
 	}
-	p,q := dtlb_util.GetPQ(lam,dt)
+	p, q := dtlb_util.GetPQ(lam, dt)
 	// Ger random number to be used throughout
 	r := rand.New(rand.NewSource(uint64(time.Now().UnixNano())))
 	f := func() fmt.Stringer {
-		X := RingRealization(T, p,q, k, n,r)
+		X := RingRealization(T, p, q, k, n, r)
 		return X.Col(0)
 	}
 	return probutil.TypicalDistrSync(f, steps)
@@ -84,11 +84,11 @@ func RingTypicalDistr(T int, lam, dt float64, k int, n, steps int) probutil.Dist
 
 func CompleteTypicalDistr(T int, lam, dt float64, k int, n, steps int) probutil.Distr {
 	fmt.Println("Running dtlb full Complete T =", T, "n = ", n)
-	p,q := dtlb_util.GetPQ(lam,dt)
+	p, q := dtlb_util.GetPQ(lam, dt)
 	// Ger random number to be used throughout
 	r := rand.New(rand.NewSource(uint64(time.Now().UnixNano())))
 	f := func() fmt.Stringer {
-		X := CompleteRealization(T, p,q, k, n,r)
+		X := CompleteRealization(T, p, q, k, n, r)
 		return X.Col(0)
 	}
 	return probutil.TypicalDistrSync(f, steps)

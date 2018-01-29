@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	
+
 	// Discrete Time Load Balancing.
 
 	// Generel Arguments
@@ -101,7 +101,7 @@ func main() {
 
 	case *mean_field:
 		*d = 1
-	//	distr = dtlb_mean_field.TypicalDistr(*T, *lam, *dt, *k, *d, *steps)
+		//	distr = dtlb_mean_field.TypicalDistr(*T, *lam, *dt, *k, *d, *steps)
 	}
 
 	b, err := json.Marshal(distr)
@@ -117,5 +117,5 @@ func main() {
 			panic(err)
 		}
 	}
-	
+
 }
