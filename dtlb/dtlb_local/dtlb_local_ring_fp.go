@@ -5,9 +5,8 @@ import (
 	"github.com/mwortsma/particle_systems/graphutil"
 	"github.com/mwortsma/particle_systems/matutil"
 	"github.com/mwortsma/particle_systems/probutil"
+	"github.com/mwortsma/particle_systems/dtlb/dtlb_util"
 	"golang.org/x/exp/rand"
-	"gonum.org/v1/gonum/stat/distuv"
-	"math"
 	"sync"
 	"time"
 )
@@ -21,6 +20,7 @@ type CondDistr []map[string]probutil.Distr
 func RingFixedPointIteration(
 	T int,
 	lam float64,
+	dt float64,
 	k int,
 	eps float64,
 	iters int,
@@ -29,12 +29,17 @@ func RingFixedPointIteration(
 
 	fmt.Println("Running dtlb ring local T = ", T)
 
+		// Ger random number to be used throughout
+	r := rand.New(rand.NewSource(uint64(time.Now().UnixNano())))
+
 	joint, cond, typical := make(probutil.Distr), initCond(T), make(probutil.Distr)
 	joint_dists := make([]float64, 0)
 	typical_dists := make([]float64, 0)
 
+	p,q := dtlb_util.GetPQ(lam,dt)
+
 	for iter := 0; iter < iters; iter++ {
-		new_joint, new_cond, new_typical, cond_misses := ringStep(T, lam, k, steps, cond)
+		new_joint, new_cond, new_typical, cond_misses := ringStep(T, p,q, k, steps, cond,r)
 		joint_dist := dist(joint, new_joint)
 		joint_dists = append(joint_dists, joint_dist)
 		typical_dist := dist(typical, new_typical)
@@ -51,10 +56,11 @@ func RingFixedPointIteration(
 
 func ringStep(
 	T int,
-	lam float64,
+	p,q float64,
 	k int,
 	steps int,
-	old_cond CondDistr) (probutil.Distr, CondDistr, probutil.Distr, int) {
+	old_cond CondDistr,
+	r *rand.Rand) (probutil.Distr, CondDistr, probutil.Distr, int) {
 
 	joint, cond, typical := make(probutil.Distr), initCond(T), make(probutil.Distr)
 
@@ -74,7 +80,7 @@ func ringStep(
 	for step := 0; step < steps; step++ {
 		go func() {
 			defer wg.Done()
-			X, cond_missed := ringRealization(T, lam, k, old_cond)
+			X, cond_missed := ringRealization(T, p,q, k, old_cond, r)
 			// update joint, typical
 			rest_mutex.Lock()
 			cond_misses += cond_missed
@@ -117,19 +123,15 @@ func ringStep(
 	return joint, cond, typical, cond_misses
 }
 
-func ringRealization(T int, lam float64, k int, cond CondDistr) (matutil.Mat, int) {
+func ringRealization(T int, p,q float64, k int, cond CondDistr, r *rand.Rand) (matutil.Mat, int) {
 	// n is how many nodes we need to keep track of.
 	cond_misses := 0
 	n := 11
 	G := graphutil.Ring(n)
 	X := matutil.Create(T, n)
-	// Ger random number to be used throughout
-	r := rand.New(rand.NewSource(uint64(time.Now().UnixNano())))
 
-	// Initial conditions.
-	p := distuv.Poisson{-math.Log(1 - lam), r}
 	for i := 0; i < n; i++ {
-		X[0][i] = int(math.Min(p.Rand(), float64(k-1)))
+		X[0][i] = dtlb_util.Init(p,q,k,r)
 	}
 
 	for t := 1; t < T; t++ {
@@ -138,33 +140,38 @@ func ringRealization(T int, lam float64, k int, cond CondDistr) (matutil.Mat, in
 		// obtain a vector of arrivals
 		arrivals := make([]bool, n)
 		for i := 1; i < n-1; i++ {
-			arrivals[i] = r.Float64() < lam
-		}
-		// if there is an arrival at 1,2 we need to sample the conditional
-		key := X.ColsT([]int{5, 4, 3, 2}, t).String()
-		if d, ok := cond[t-1][key]; ok {
-			sample := matutil.StringToVec(probutil.Sample(d, r.Float64()))
-			X[t-1][0], X[t-1][1] = sample[1], sample[0]
-		} else {
-			// TODO
-			cond_misses++
-			X[t-1][0], X[t-1][1] = int(math.Min(p.Rand(), float64(k-1))), int(math.Min(p.Rand(), float64(k-1)))
+			arrivals[i] = r.Float64() < p
 		}
 
-		// if there is an arrival at 8,9 we need to sample the conditional
-		key = X.ColsT([]int{5, 6, 7, 8}, t).String()
-		if d, ok := cond[t-1][key]; ok {
-			sample := matutil.StringToVec(probutil.Sample(d, r.Float64()))
-			X[t-1][9], X[t-1][10] = sample[0], sample[1]
-		} else {
-			// TODO
-			cond_misses++
-			X[t-1][9], X[t-1][10] = int(math.Min(p.Rand(), float64(k-1))), int(math.Min(p.Rand(), float64(k-1)))
+		if arrivals[1] || arrivals[2] {
+			// if there is an arrival at 1,2 we need to sample the conditional
+			key := X.ColsT([]int{5, 4, 3, 2}, t).String()
+			if d, ok := cond[t-1][key]; ok {
+				sample := matutil.StringToVec(probutil.Sample(d, r.Float64()))
+				X[t-1][0], X[t-1][1] = sample[1], sample[0]
+			} else {
+				// TODO
+				cond_misses++
+				X[t-1][0], X[t-1][1] = dtlb_util.Init(p,q,k,r), dtlb_util.Init(p,q,k,r)
+			}
+		}
+
+		if arrivals[8] || arrivals[9] {
+			// if there is an arrival at 8,9 we need to sample the conditional
+			key := X.ColsT([]int{5, 6, 7, 8}, t).String()
+			if d, ok := cond[t-1][key]; ok {
+				sample := matutil.StringToVec(probutil.Sample(d, r.Float64()))
+				X[t-1][9], X[t-1][10] = sample[0], sample[1]
+			} else {
+				// TODO
+				cond_misses++
+				X[t-1][9], X[t-1][10] = dtlb_util.Init(p,q,k,r), dtlb_util.Init(p,q,k,r)
+			}
 		}
 
 		for i := 1; i < n-1; i++ {
 			// Serve an item if non-empty
-			if X[t-1][i] > 0 {
+			if X[t-1][i] > 0 && r.Float64() < q {
 				X[t][i]--
 			}
 			// With probability lam there is an arrival.

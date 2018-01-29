@@ -5,23 +5,18 @@ import (
 	"github.com/mwortsma/particle_systems/graphutil"
 	"github.com/mwortsma/particle_systems/matutil"
 	"github.com/mwortsma/particle_systems/probutil"
+	"github.com/mwortsma/particle_systems/dtlb/dtlb_util"
 	"golang.org/x/exp/rand"
-	"gonum.org/v1/gonum/stat/distuv"
-	"math"
 	"time"
 )
 
-func GraphRealization(T int, lam float64, k int, G graphutil.Graph) matutil.Mat {
+func GraphRealization(T int, p,q float64, k int, G graphutil.Graph, r *rand.Rand) matutil.Mat {
 	n := len(G)
 	X := matutil.Create(T, n)
 
-	// Ger random number to be used throughout
-	r := rand.New(rand.NewSource(uint64(time.Now().UnixNano())))
-
 	// Initial conditions.
-	p := distuv.Poisson{-math.Log(1 - lam), r}
 	for i := 0; i < n; i++ {
-		X[0][i] = int(math.Min(p.Rand(), float64(k-1)))
+		X[0][i] = dtlb_util.Init(p,q,k,r)
 	}
 
 	for t := 1; t < T; t++ {
@@ -29,12 +24,12 @@ func GraphRealization(T int, lam float64, k int, G graphutil.Graph) matutil.Mat 
 		copy(X[t], X[t-1])
 		for i := 0; i < n; i++ {
 			// Serve an item if non-empty
-			if X[t-1][i] > 0 {
+			if X[t-1][i] > 0 && r.Float64() < q {
 				X[t][i]--
 			}
 			// With probability lam there is an arrival.
 			// Send to minimum neighbor.
-			if r.Float64() < lam {
+			if r.Float64() < p {
 				// First get the min value
 				min := X[t-1][i]
 				for j := 0; j < len(G[i]); j++ {
@@ -64,30 +59,36 @@ func GraphRealization(T int, lam float64, k int, G graphutil.Graph) matutil.Mat 
 	return X
 }
 
-func RingRealization(T int, lam float64, k int, n int) matutil.Mat {
-	return GraphRealization(T, lam, k, graphutil.Ring(n))
+func RingRealization(T int, p,q float64, k int, n int, r *rand.Rand) matutil.Mat {
+	return GraphRealization(T, p,q, k, graphutil.Ring(n), r)
 }
 
-func CompleteRealization(T int, lam float64, k int, n int) matutil.Mat {
-	return GraphRealization(T, lam, k, graphutil.Complete(n))
+func CompleteRealization(T int, p,q float64, k int, n int, r *rand.Rand) matutil.Mat {
+	return GraphRealization(T, p,q, k, graphutil.Complete(n), r)
 }
 
-func RingTypicalDistr(T int, lam float64, k int, n, steps int) probutil.Distr {
+func RingTypicalDistr(T int, lam, dt float64, k int, n, steps int) probutil.Distr {
 	fmt.Println("Running dtlb full ring T =", T, "n = ", n)
 	if n < 0 {
 		n = 1 + 4*T
 	}
+	p,q := dtlb_util.GetPQ(lam,dt)
+	// Ger random number to be used throughout
+	r := rand.New(rand.NewSource(uint64(time.Now().UnixNano())))
 	f := func() fmt.Stringer {
-		X := RingRealization(T, lam, k, n)
+		X := RingRealization(T, p,q, k, n,r)
 		return X.Col(0)
 	}
 	return probutil.TypicalDistrSync(f, steps)
 }
 
-func CompleteTypicalDistr(T int, lam float64, k int, n, steps int) probutil.Distr {
+func CompleteTypicalDistr(T int, lam, dt float64, k int, n, steps int) probutil.Distr {
 	fmt.Println("Running dtlb full Complete T =", T, "n = ", n)
+	p,q := dtlb_util.GetPQ(lam,dt)
+	// Ger random number to be used throughout
+	r := rand.New(rand.NewSource(uint64(time.Now().UnixNano())))
 	f := func() fmt.Stringer {
-		X := CompleteRealization(T, lam, k, n)
+		X := CompleteRealization(T, p,q, k, n,r)
 		return X.Col(0)
 	}
 	return probutil.TypicalDistrSync(f, steps)

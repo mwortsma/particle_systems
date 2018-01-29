@@ -6,13 +6,13 @@ import (
 	"fmt"
 	"github.com/mwortsma/particle_systems/dtlb/dtlb_full"
 	"github.com/mwortsma/particle_systems/dtlb/dtlb_local"
-	"github.com/mwortsma/particle_systems/dtlb/dtlb_mean_field"
+	//"github.com/mwortsma/particle_systems/dtlb/dtlb_mean_field"
 	"github.com/mwortsma/particle_systems/probutil"
 	"io/ioutil"
 )
 
 func main() {
-
+	
 	// Discrete Time Load Balancing.
 
 	// Generel Arguments
@@ -45,6 +45,7 @@ func main() {
 	// Defining the arguments.
 	full_ring := flag.Bool("full_ring", false, "Full sim on the ring")
 	full_complete := flag.Bool("full_complete", false, "Full sim on the complete graph")
+	full_tree := flag.Bool("full_tree", false, "Full sim on a regular tree")
 
 	local_ring_fp := flag.Bool("local_ring_fp", false, "Local sim fixed point on the ring")
 	local_ring_realization := flag.Bool("local_ring_realization", false, "Local sim realization on the ring")
@@ -56,6 +57,7 @@ func main() {
 	T := flag.Int("T", 2, "time horizon. T>0")
 	k := flag.Int("k", 5, "Finite buffer. No queue can have capacity k.")
 	lam := flag.Float64("lam", 0.8, "incoming rate at each node")
+	dt := flag.Float64("dt", 1, "time step")
 	steps := flag.Int("steps", 100, "how many samples used in generating the empirical distribtuion")
 	var file_str string
 	flag.StringVar(&file_str, "file", "", "where to save the distribution.")
@@ -83,19 +85,23 @@ func main() {
 
 	switch {
 	case *full_ring:
-		distr = dtlb_full.RingTypicalDistr(*T, *lam, *k, *n, *steps)
+		distr = dtlb_full.RingTypicalDistr(*T, *lam, *dt, *k, *n, *steps)
 
 	case *full_complete:
-		distr = dtlb_full.CompleteTypicalDistr(*T, *lam, *k, *n, *steps)
+		distr = dtlb_full.CompleteTypicalDistr(*T, *lam, *dt, *k, *n, *steps)
+
+	case *full_tree:
+		distr = dtlb_full.RegTreeTypicalDistr(*T, *d, *lam, *dt, *k, *steps)
 
 	case *local_ring_fp:
-		_, distr, _, _ = dtlb_local.RingFixedPointIteration(*T, *lam, *k, *eps, *iters, *steps, dist)
+		_, distr, _, _ = dtlb_local.RingFixedPointIteration(*T, *lam, *dt, *k, *eps, *iters, *steps, dist)
 
 	case *local_ring_realization:
-		distr = dtlb_local.LocalRingRealizationTypicalDistr(*T, *lam, *k, *steps)
+		distr = dtlb_local.LocalRingRealizationTypicalDistr(*T, *lam, *dt, *k, *steps)
 
 	case *mean_field:
-		distr = dtlb_mean_field.TypicalDistr(*T, *lam, *k, *d, *steps)
+		*d = 1
+	//	distr = dtlb_mean_field.TypicalDistr(*T, *lam, *dt, *k, *d, *steps)
 	}
 
 	b, err := json.Marshal(distr)
@@ -111,5 +117,5 @@ func main() {
 			panic(err)
 		}
 	}
-
+	
 }

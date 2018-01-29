@@ -5,22 +5,19 @@ import (
 	"github.com/mwortsma/particle_systems/graphutil"
 	"github.com/mwortsma/particle_systems/matutil"
 	"github.com/mwortsma/particle_systems/probutil"
+	"github.com/mwortsma/particle_systems/dtlb/dtlb_util"
 	"golang.org/x/exp/rand"
-	"gonum.org/v1/gonum/stat/distuv"
-	"math"
 	"time"
 )
 
-func LocalRingRealization(T int, lam float64, k int, match_cols []int, match_vals matutil.Mat, r *rand.Rand) (matutil.Mat, bool) {
+func LocalRingRealization(T int, p,q float64, k int, match_cols []int, match_vals matutil.Mat, r *rand.Rand) (matutil.Mat, bool) {
 	// n is how many nodes we need to keep track of.
 	n := 11
 	G := graphutil.Ring(n)
 	X := matutil.Create(T, n)
 
-	// Initial conditions.
-	p := distuv.Poisson{-math.Log(1 - lam), r}
 	for i := 0; i < n; i++ {
-		X[0][i] = int(math.Min(p.Rand(), float64(k-1)))
+		X[0][i] = dtlb_util.Init(p,q,k,r)
 	}
 
 	for t := 1; t < T; t++ {
@@ -29,7 +26,7 @@ func LocalRingRealization(T int, lam float64, k int, match_cols []int, match_val
 		// obtain a vector of arrivals
 		arrivals := make([]bool, n)
 		for i := 1; i < n-1; i++ {
-			arrivals[i] = r.Float64() < lam
+			arrivals[i] = r.Float64() < p
 		}
 
 		if arrivals[1] || arrivals[2] {
@@ -40,7 +37,7 @@ func LocalRingRealization(T int, lam float64, k int, match_cols []int, match_val
 			var b_left bool
 
 			for !b_left {
-				Y_left, b_left = LocalRingRealization(t, lam, k, left_match_cols, left_match_vals, r)
+				Y_left, b_left = LocalRingRealization(t, p,q, k, left_match_cols, left_match_vals, r)
 			}
 			X[t-1][0], X[t-1][1] = Y_left[t-1][5], Y_left[t-1][4]
 		}
@@ -53,14 +50,14 @@ func LocalRingRealization(T int, lam float64, k int, match_cols []int, match_val
 			var b_right bool
 
 			for !b_right {
-				Y_right, b_right = LocalRingRealization(t, lam, k, right_match_cols, right_match_vals, r)
+				Y_right, b_right = LocalRingRealization(t, p,q, k, right_match_cols, right_match_vals, r)
 			}
 			X[t-1][9], X[t-1][10] = Y_right[t-1][2], Y_right[t-1][1]
 		}
 
 		for i := 1; i < n-1; i++ {
 			// Serve an item if non-empty
-			if X[t-1][i] > 0 {
+			if X[t-1][i] > 0 && r.Float64() < q {
 				X[t][i]--
 			}
 			// With probability lam there is an arrival.
@@ -99,10 +96,11 @@ func LocalRingRealization(T int, lam float64, k int, match_cols []int, match_val
 	return X.Cols([]int{2, 3, 4, 5, 6, 7, 8}), true
 }
 
-func LocalRingRealizationTypicalDistr(T int, lam float64, k int, steps int) probutil.Distr {
+func LocalRingRealizationTypicalDistr(T int, lam, dt float64, k int, steps int) probutil.Distr {
 	r := rand.New(rand.NewSource(uint64(time.Now().UnixNano())))
+	p,q := dtlb_util.GetPQ(lam,dt)
 	f := func() fmt.Stringer {
-		X, _ := LocalRingRealization(T, lam, k, nil, nil, r)
+		X, _ := LocalRingRealization(T, p,q, k, nil, nil, r)
 		return X.Col(3)
 	}
 	return probutil.TypicalDistr(f, steps)

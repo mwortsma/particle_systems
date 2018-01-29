@@ -1,3 +1,0 @@
-TODO:
-
-Fix the rand.Rand bug -- look into this.
