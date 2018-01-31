@@ -45,7 +45,7 @@ prefix = "" if args.binary_path is None else args.binary_path
 
 # Run commands
 for i in range(len(commands)):
-	revised_command = prefix + commands[i] + " -file=" + files[i]
+	revised_command = "time " + prefix + commands[i] + " -file=" + files[i]
 	if args.shared is not None:
 		revised_command = revised_command + " " + args.shared
 	print "running: " + revised_command

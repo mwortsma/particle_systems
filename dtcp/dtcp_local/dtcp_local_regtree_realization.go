@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func LocalRegTreeRealization(T, d int, p, q float64, nu float64, match_cols []int, match_vals matutil.Mat, r *rand.Rand) (matutil.Mat, bool) {
+func LocalRegTreeRealization(T, d int, p, q float64, nu float64, tau int, match_cols []int, match_vals matutil.Mat, r *rand.Rand) (matutil.Mat, bool) {
 	// n is how many nodes we need to keep track of.
 	// X[0] stores the root. X[1:d+1] store the children.
 	X := matutil.Create(T, d+1)
@@ -21,7 +21,9 @@ func LocalRegTreeRealization(T, d int, p, q float64, nu float64, match_cols []in
 	}
 
 	for i, c := range match_cols {
-		X[0][c] = match_vals[0][i]
+		if tau <= 0 || T-tau <= 0 {
+			X[0][c] = match_vals[0][i]
+		}
 	}
 
 	for t := 1; t < T; t++ {
@@ -51,11 +53,18 @@ func LocalRegTreeRealization(T, d int, p, q float64, nu float64, match_cols []in
 
 				var Y matutil.Mat
 				var b bool
+				var rec_match_vals matutil.Mat
+
 				rec_match_cols := []int{i, 0}
-				rec_match_vals := X.ColsT([]int{0, i}, t)
+
+				if tau <= 0 || t-tau < 0 {
+					rec_match_vals = X.ColsT([]int{0, i}, t)
+				} else {
+					rec_match_vals = X.ColsRange([]int{0, i}, t-tau, t)
+				}
 
 				for !b {
-					Y, b = LocalRegTreeRealization(t, d, p, q, nu, rec_match_cols, rec_match_vals, r)
+					Y, b = LocalRegTreeRealization(t, d, p, q, nu, tau, rec_match_cols, rec_match_vals, r)
 				}
 
 				sum_neighbors := 0
@@ -75,7 +84,7 @@ func LocalRegTreeRealization(T, d int, p, q float64, nu float64, match_cols []in
 			}
 		}
 
-		if !X.Match(match_cols, match_vals, t) {
+		if !X.Match(match_cols, match_vals, t, tau) {
 			return [][]int{}, false
 		}
 	}
@@ -83,11 +92,11 @@ func LocalRegTreeRealization(T, d int, p, q float64, nu float64, match_cols []in
 	return X, true
 }
 
-func LocalRegTreeRealizationTypicalDistr(T, d int, p, q float64, nu float64, steps int) probutil.Distr {
+func LocalRegTreeRealizationTypicalDistr(T, d int, p, q float64, nu float64, steps int, tau int) probutil.Distr {
 	r := rand.New(rand.NewSource(uint64(time.Now().UnixNano())))
 	f := func() fmt.Stringer {
-		X, _ := LocalRegTreeRealization(T, d, p, q, nu, nil, nil, r)
+		X, _ := LocalRegTreeRealization(T, d, p, q, nu, tau, nil, nil, r)
 		return X.Col(1)
 	}
-	return probutil.TypicalDistr(f, steps)
+	return probutil.TypicalDistrSync(f, steps)
 }

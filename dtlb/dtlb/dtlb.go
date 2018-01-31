@@ -50,14 +50,13 @@ func main() {
 	local_ring_fp := flag.Bool("local_ring_fp", false, "Local sim fixed point on the ring")
 	local_ring_realization := flag.Bool("local_ring_realization", false, "Local sim realization on the ring")
 
-	mean_field := flag.Bool("mean_field", false, "Mean Field simulation.")
-
 	d := flag.Int("d", -1, "degree of a noe")
 	n := flag.Int("n", -1, "number of nodes")
 	T := flag.Int("T", 2, "time horizon. T>0")
 	k := flag.Int("k", 5, "Finite buffer. No queue can have capacity k.")
 	lam := flag.Float64("lam", 0.8, "incoming rate at each node")
 	dt := flag.Float64("dt", 1, "time step")
+	tau := flag.Int("tau", -1, "how many steps to look back")
 	steps := flag.Int("steps", 100, "how many samples used in generating the empirical distribtuion")
 	var file_str string
 	flag.StringVar(&file_str, "file", "", "where to save the distribution.")
@@ -94,14 +93,10 @@ func main() {
 		distr = dtlb_full.RegTreeTypicalDistr(*T, *d, *lam, *dt, *k, *steps)
 
 	case *local_ring_fp:
-		_, distr, _, _ = dtlb_local.RingFixedPointIteration(*T, *lam, *dt, *k, *eps, *iters, *steps, dist)
+		_, distr, _, _ = dtlb_local.RingFixedPointIteration(*T, *lam, *dt, *k, *eps, *iters, *steps, *tau, dist)
 
 	case *local_ring_realization:
-		distr = dtlb_local.LocalRingRealizationTypicalDistr(*T, *lam, *dt, *k, *steps)
-
-	case *mean_field:
-		*d = 1
-		//	distr = dtlb_mean_field.TypicalDistr(*T, *lam, *dt, *k, *d, *steps)
+		distr = dtlb_local.LocalRingRealizationTypicalDistr(*T, *lam, *dt, *k, *steps, *tau)
 	}
 
 	b, err := json.Marshal(distr)

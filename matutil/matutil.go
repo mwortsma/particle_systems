@@ -59,6 +59,17 @@ func (mat Mat) ColsT(cols []int, row int) Mat {
 	return m
 }
 
+func (mat Mat) ColsRange(cols []int, start int, stop int) Mat {
+	c := len(cols)
+	m := Create(stop-start, c)
+	for i := start; i < stop; i++ {
+		for j := 0; j < c; j++ {
+			m[i-start][j] = mat[i][cols[j]]
+		}
+	}
+	return m
+}
+
 func (mat Mat) Colst(cols []int, row int) Vec {
 	c := len(cols)
 	v := make(Vec, c)
@@ -68,12 +79,25 @@ func (mat Mat) Colst(cols []int, row int) Vec {
 	return v
 }
 
-func (mat Mat) Match(cols []int, vals Mat, r int) bool {
+func (mat Mat) Match(cols []int, vals Mat, t int, tau int) bool {
+
+	if tau > 0 && t < len(mat) - tau {
+		return true
+	}
+	var a int
+	if tau <= 0 || t-tau < 0{
+		a = t
+	} else {
+		a = t - (len(mat) - tau)
+	}
+
+
 	for i, c := range cols {
-		if mat[r][c] != vals[r][i] {
+		if mat[t][c] != vals[a][i] {
 			return false
 		}
 	}
+
 	return true
 }
 

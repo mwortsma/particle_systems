@@ -25,6 +25,7 @@ func RingFixedPointIteration(
 	eps float64,
 	iters int,
 	steps int,
+	tau int,
 	dist probutil.Distance) (probutil.Distr, probutil.Distr, []float64, []float64) {
 
 	fmt.Println("Running dtlb ring local T = ", T)
@@ -39,7 +40,7 @@ func RingFixedPointIteration(
 	p, q := dtlb_util.GetPQ(lam, dt)
 
 	for iter := 0; iter < iters; iter++ {
-		new_joint, new_cond, new_typical, cond_misses := ringStep(T, p, q, k, steps, cond, r)
+		new_joint, new_cond, new_typical, cond_misses := ringStep(T, p, q, k, steps, tau, cond, r)
 		joint_dist := dist(joint, new_joint)
 		joint_dists = append(joint_dists, joint_dist)
 		typical_dist := dist(typical, new_typical)
@@ -59,6 +60,7 @@ func ringStep(
 	p, q float64,
 	k int,
 	steps int,
+	tau int,
 	old_cond CondDistr,
 	r *rand.Rand) (probutil.Distr, CondDistr, probutil.Distr, int) {
 
@@ -80,7 +82,7 @@ func ringStep(
 	for step := 0; step < steps; step++ {
 		go func() {
 			defer wg.Done()
-			X, cond_missed := ringRealization(T, p, q, k, old_cond, r)
+			X, cond_missed := ringRealization(T, p, q, k, tau, old_cond, r)
 			// update joint, typical
 			rest_mutex.Lock()
 			cond_misses += cond_missed
@@ -92,7 +94,12 @@ func ringStep(
 			left := X.Cols([]int{0, 1, 2, 3})
 			right := X.Cols([]int{6, 5, 4, 3})
 			for t := 1; t < T; t++ {
-				left_key, right_key := left[:t].String(), right[:t].String()
+				var left_key, right_key string
+				if tau <= 0 || t-tau < 0 {
+					left_key, right_key = left[:t].String(), right[:t].String()
+				} else {
+					left_key, right_key = left[t-tau:t].String(), right[t-tau:t].String()
+				}
 				if _, ok := cond[t-1][left_key]; !ok {
 					cond[t-1][left_key] = make(probutil.Distr)
 					obvserved[t-1][left_key] = 0
@@ -123,7 +130,7 @@ func ringStep(
 	return joint, cond, typical, cond_misses
 }
 
-func ringRealization(T int, p, q float64, k int, cond CondDistr, r *rand.Rand) (matutil.Mat, int) {
+func ringRealization(T int, p, q float64, k int, tau int, cond CondDistr, r *rand.Rand) (matutil.Mat, int) {
 	// n is how many nodes we need to keep track of.
 	cond_misses := 0
 	n := 11
@@ -145,7 +152,13 @@ func ringRealization(T int, p, q float64, k int, cond CondDistr, r *rand.Rand) (
 
 		if arrivals[1] || arrivals[2] {
 			// if there is an arrival at 1,2 we need to sample the conditional
-			key := X.ColsT([]int{5, 4, 3, 2}, t).String()
+			var key string
+			if tau <= 0 || t-tau < 0 {
+				key = X.ColsT([]int{5, 4, 3, 2}, t).String()
+			} else {
+				key = X.ColsRange([]int{5, 4, 3, 2}, t-tau, t).String()
+			}
+
 			if d, ok := cond[t-1][key]; ok {
 				sample := matutil.StringToVec(probutil.Sample(d, r.Float64()))
 				X[t-1][0], X[t-1][1] = sample[1], sample[0]
@@ -158,7 +171,12 @@ func ringRealization(T int, p, q float64, k int, cond CondDistr, r *rand.Rand) (
 
 		if arrivals[8] || arrivals[9] {
 			// if there is an arrival at 8,9 we need to sample the conditional
-			key := X.ColsT([]int{5, 6, 7, 8}, t).String()
+			var key string
+			if tau <= 0 || t-tau < 0 {
+				key = X.ColsT([]int{5, 6, 7, 8}, t).String()
+			} else {
+				key = X.ColsRange([]int{5, 6, 7, 8}, t-tau, t).String()
+			}
 			if d, ok := cond[t-1][key]; ok {
 				sample := matutil.StringToVec(probutil.Sample(d, r.Float64()))
 				X[t-1][9], X[t-1][10] = sample[0], sample[1]

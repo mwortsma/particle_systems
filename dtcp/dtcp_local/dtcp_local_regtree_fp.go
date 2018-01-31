@@ -20,7 +20,11 @@ func RegTreeFixedPointIteration(
 	eps float64,
 	iters int,
 	steps int,
+	tau int,
 	dist probutil.Distance) (probutil.Distr, probutil.Distr, []float64, []float64) {
+
+	// Ger random number to be used throughout
+	r := rand.New(rand.NewSource(uint64(time.Now().UnixNano())))
 
 	fmt.Println("Running dtcp local fixed point simulation d =", d)
 
@@ -29,7 +33,7 @@ func RegTreeFixedPointIteration(
 	typical_dists := make([]float64, 0)
 
 	for iter := 0; iter < iters; iter++ {
-		new_joint, new_cond, new_typical, cond_misses := ringStep(T, d, p, q, nu, steps, cond)
+		new_joint, new_cond, new_typical, cond_misses := ringStep(T, d, p, q, nu, steps, tau, cond, r)
 		joint_dist := dist(joint, new_joint)
 		joint_dists = append(joint_dists, joint_dist)
 		typical_dist := dist(typical, new_typical)
@@ -51,7 +55,9 @@ func ringStep(
 	q float64,
 	nu float64,
 	steps int,
-	old_cond CondDistr) (probutil.Distr, CondDistr, probutil.Distr, int) {
+	tau int, 
+	old_cond CondDistr,
+	r *rand.Rand) (probutil.Distr, CondDistr, probutil.Distr, int) {
 
 	joint, cond, typical := make(probutil.Distr), initCond(T), make(probutil.Distr)
 
@@ -71,7 +77,7 @@ func ringStep(
 	for step := 0; step < steps; step++ {
 		go func() {
 			defer wg.Done()
-			X, cond_missed := treeRealization(T, d, p, q, nu, old_cond)
+			X, cond_missed := treeRealization(T, d, p, q, nu, tau, old_cond, r)
 			// update joint, typical
 			rest_mutex.Lock()
 			cond_misses += cond_missed
@@ -83,7 +89,12 @@ func ringStep(
 			for i := 1; i < d+1; i++ {
 				key := X.Cols([]int{0, i})
 				for t := 1; t < T; t++ {
-					keyt := key[:t].String()
+					var keyt string
+					if tau <= 0 || t-tau < 0{
+						keyt = key[:t].String()
+					} else {
+						keyt = key[t-tau:t].String()
+					}
 					sum_neighbors := 0
 					for j := 1; j < d+1; j++ {
 						if j != i {
@@ -118,13 +129,11 @@ func ringStep(
 	return joint, cond, typical, cond_misses
 }
 
-func treeRealization(T, d int, p, q float64, nu float64, cond CondDistr) (matutil.Mat, int) {
+func treeRealization(T, d int, p, q float64, nu float64, tau int, cond CondDistr, r *rand.Rand) (matutil.Mat, int) {
 	// n is how many nodes we need to keep track of.
 	cond_misses := 0
 	// X[0] stores the root. X[1:d+1] store the children.
 	X := matutil.Create(T, d+1)
-	// Ger random number to be used throughout
-	r := rand.New(rand.NewSource(uint64(time.Now().UnixNano())))
 
 	// Initial conditions.
 	for i := 0; i < d+1; i++ {
@@ -157,8 +166,13 @@ func treeRealization(T, d int, p, q float64, nu float64, cond CondDistr) (matuti
 		// update the rest of the neighbors.
 		for i := 1; i < d+1; i++ {
 			if X[t-1][i] == 0 {
+				var key string
+				if tau <= 0 || t-tau < 0{
+					key = X.ColsT([]int{i, 0}, t).String()
+				} else {
+					key = X.ColsRange([]int{i, 0}, t-tau,t).String()
+				}
 
-				key := X.ColsT([]int{i, 0}, t).String()
 				sum_neighbors := X[t-1][0]
 
 				if distr, ok := cond[t-1][key]; ok {

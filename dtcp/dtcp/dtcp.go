@@ -66,6 +66,8 @@ func main() {
 	p := flag.Float64("p", 2.0/3.0, "transition 0->1 with probability (p/d)*sum(neighbors)")
 	q := flag.Float64("q", 1.0/3.0, "transntion 1->0 with probability q")
 	nu := flag.Float64("nu", 0.5, "P(X_0 = 1)")
+	tau := flag.Int("tau", -1, "how many steps to look back")
+
 	steps := flag.Int("steps", 100, "how many samples used in generating the empirical distribtuion")
 	var file_str string
 	flag.StringVar(&file_str, "file", "", "where to save the distribution.")
@@ -102,16 +104,16 @@ func main() {
 		distr = dtcp_full.RegTreeTypicalDistr(*T, *d, *p, *q, *nu, *steps)
 
 	case *local_ring_fp:
-		_, distr, _, _ = dtcp_local.RegTreeFixedPointIteration(*T, 2, *p, *q, *nu, *eps, *iters, *steps, dist)
+		_, distr, _, _ = dtcp_local.RegTreeFixedPointIteration(*T, 2, *p, *q, *nu, *eps, *iters, *steps, *tau, dist)
 
 	case *local_tree_fp:
-		_, distr, _, _ = dtcp_local.RegTreeFixedPointIteration(*T, *d, *p, *q, *nu, *eps, *iters, *steps, dist)
+		_, distr, _, _ = dtcp_local.RegTreeFixedPointIteration(*T, *d, *p, *q, *nu, *eps, *iters, *steps, *tau, dist)
 
 	case *local_ring_realization:
-		distr = dtcp_local.LocalRegTreeRealizationTypicalDistr(*T, 2, *p, *q, *nu, *steps)
+		distr = dtcp_local.LocalRegTreeRealizationTypicalDistr(*T, 2, *p, *q, *nu, *steps, *tau)
 
 	case *local_tree_realization:
-		distr = dtcp_local.LocalRegTreeRealizationTypicalDistr(*T, *d, *p, *q, *nu, *steps)
+		distr = dtcp_local.LocalRegTreeRealizationTypicalDistr(*T, *d, *p, *q, *nu, *steps, *tau)
 
 	case *mean_field_realization:
 		distr = dtcp_mean_field.RealizationTypicalDistr(*T, *p, *q, *nu, *steps)
