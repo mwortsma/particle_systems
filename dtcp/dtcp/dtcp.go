@@ -59,6 +59,8 @@ func main() {
 
 	mean_field_realization := flag.Bool("mean_field_realization", false, "Mean Field simulation.")
 	mean_field_fp := flag.Bool("mean_field_fp", false, "Mean Field fixed point simulation.")
+	mean_field_recursion := flag.Bool("mean_field_recursion", false, "Mean Field simulation.")
+
 
 	d := flag.Int("d", -1, "degree of a noe")
 	n := flag.Int("n", -1, "number of nodes")
@@ -120,6 +122,9 @@ func main() {
 
 	case *mean_field_fp:
 		distr = dtcp_mean_field.MeanFieldFixedPointIteration(*T, *p, *q, *nu, *eps, *iters, *steps, dist)
+
+case *mean_field_recursion:
+		distr = dtcp_mean_field.RecursionTypicalDistr(*T, *p, *q, *nu, *steps)
 	}
 
 	b, err := json.Marshal(distr)
