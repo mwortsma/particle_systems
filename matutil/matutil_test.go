@@ -21,3 +21,8 @@ func TestMat(t *testing.T) {
 	t.Log(matutil.StringToMat(m.ColsT([]int{2, 0}, 2).String()))
 	t.Log(matutil.StringToVec(m.Col(1).String()).String())
 }
+
+
+func TestBin(t *testing.T) {
+	matutil.Concat([]int{0,3},[][]int{[]int{1,2}, []int{4,5}}).Print()
+}

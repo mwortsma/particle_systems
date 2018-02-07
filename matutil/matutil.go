@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"math"
+	"strconv"
 )
 
 type Mat [][]int
@@ -54,6 +56,17 @@ func (mat Mat) ColsT(cols []int, row int) Mat {
 	for i := 0; i < row; i++ {
 		for j := 0; j < c; j++ {
 			m[i][j] = mat[i][cols[j]]
+		}
+	}
+	return m
+}
+
+func (mat Mat) AllColsT(row int) Mat {
+	_,c := mat.Dims()
+	m := Create(row, c)
+	for i := 0; i < row; i++ {
+		for j := 0; j < c; j++ {
+			m[i][j] = mat[i][j]
 		}
 	}
 	return m
@@ -130,4 +143,51 @@ func (mat Mat) Print() {
 	for i := 0; i < r; i++ {
 		fmt.Println(mat[i])
 	}
+}
+
+func BinaryStrings(n int) []Vec {
+	s := make([]Vec, int(math.Pow(2.0, float64(n))))
+	for i := 0; i < int(math.Pow(2.0, float64(n))); i++ {
+		b := []byte(string(strconv.FormatInt(int64(i), 2)))
+		a := make(Vec, n)
+		for j := 0; j < len(b); j++ {
+			a[j] = int(b[len(b)-j-1]-48)
+		}
+		s[i] = a
+	}
+	return s
+
+}
+
+func BinaryMats(r,c int) []Mat {
+	l := int(math.Pow(2.0, float64(r*c)))
+	s := make([]Mat, l)
+	strings := BinaryStrings(r*c)
+	for k, str := range strings {
+		s[k] = Create(r,c)
+		for i := 0; i < r; i ++ {
+			for j := 0; j < c; j++ {
+				s[k][i][j] = str[c*i + j]
+			}
+		}
+	}
+	return s
+}
+
+func Concat(m1 Mat, m2 Mat) Mat {
+	rows, cols := m1.Dims()
+	_, cols2 := m2.Dims()
+
+	new_mat := Create(rows, cols + cols2)
+	for i := 0; i < rows; i++ {
+		for j := 0; j < cols; j++ {
+			new_mat[i][j] = m1[i][j] 
+		}
+	}
+	for i := 0; i < rows; i++ {
+		for j := 0; j < cols2; j++ {
+			new_mat[i][j+cols] = m2[i][j] 
+		}
+	}
+	return new_mat
 }

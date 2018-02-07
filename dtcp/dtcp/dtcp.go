@@ -57,6 +57,8 @@ func main() {
 	local_ring_realization := flag.Bool("local_ring_realization", false, "Local sim on the ring")
 	local_tree_realization := flag.Bool("local_tree_realization", false, "Local sim on a regular tree")
 
+	local_tree_recursion := flag.Bool("local_tree_recursion", false, "Local recursion")
+
 	mean_field_realization := flag.Bool("mean_field_realization", false, "Mean Field simulation.")
 	mean_field_fp := flag.Bool("mean_field_fp", false, "Mean Field fixed point simulation.")
 	mean_field_recursion := flag.Bool("mean_field_recursion", false, "Mean Field simulation.")
@@ -116,6 +118,9 @@ func main() {
 
 	case *local_tree_realization:
 		distr = dtcp_local.LocalRegTreeRealizationTypicalDistr(*T, *d, *p, *q, *nu, *steps, *tau)
+
+	case *local_tree_recursion:
+		distr = dtcp_local.RecursionTypicalDistr(*T, *d, *p, *q, *nu, *tau)
 
 	case *mean_field_realization:
 		distr = dtcp_mean_field.RealizationTypicalDistr(*T, *p, *q, *nu, *steps)
