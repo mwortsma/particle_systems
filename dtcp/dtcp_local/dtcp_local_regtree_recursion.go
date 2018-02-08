@@ -66,8 +66,7 @@ func getDistributions(T,d int, p,q float64, nu float64, tau int) (JointDistr, Co
 				full := matutil.Concat(history, path)
 				prob := f[t-1][full.String()]
 				sum_prob += prob
-				// root is stored at 0
-				sum := history[t-1][0]
+				sum := 0
 				for j := 0; j < d-1; j++ {
 					sum += path[t-1][j]
 				}
@@ -92,7 +91,7 @@ func getDistributions(T,d int, p,q float64, nu float64, tau int) (JointDistr, Co
 			f[t][str] *= transitionProb(prev[0], curr[0], sum, d, p, q)
 			for j := 1; j < d+1; j++ {
 				sum = c[t-1][hist.Cols([]int{j,0}).String()]
-				f[t][str] *= transitionProb(prev[j], curr[j],sum,d, p,q)
+				f[t][str] *= transitionProb(prev[j], curr[j],float64(prev[0]) + sum,d, p,q)
 			}
 		}
 	}
@@ -111,8 +110,7 @@ func RecursionTypicalDistr(T,d int, p,q float64, nu float64, tau int) probutil.D
 	f := make(map[string]float64)
 	states := matutil.BinaryMats(T, d+1)
 	for _, state := range states {
-		// TODO change when debugged
-		path := state.Col(2).String()
+		path := state.Col(0).String()
 		if _, ok := f[path]; !ok {
 			f[path] = 0.0
 		}
