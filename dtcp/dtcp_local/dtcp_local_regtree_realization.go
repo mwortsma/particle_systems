@@ -67,9 +67,11 @@ func LocalRegTreeRealization(T, d int, p, q float64, nu float64, tau int, match_
 					Y, b = LocalRegTreeRealization(t, d, p, q, nu, tau, rec_match_cols, rec_match_vals, r)
 				}
 
-				sum_neighbors := 0
+				sum_neighbors := X[t-1][0]
 				for j := 1; j < d+1; j++ {
-					sum_neighbors += Y[t-1][j]
+					if j != i {
+						sum_neighbors += Y[t-1][j]
+					}
 				}
 
 				if r.Float64() < (p/float64(d))*float64(sum_neighbors) {

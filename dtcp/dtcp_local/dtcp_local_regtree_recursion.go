@@ -96,12 +96,6 @@ func getDistributions(T,d int, p,q float64, nu float64, tau int) (JointDistr, Co
 		}
 	}
 	
-	fmt.Println(f[0])
-	fmt.Println("\n\n\n\n")
-	fmt.Println(c[0])
-	fmt.Println("\n\n\n\n")
-	fmt.Println(f[1])
-	
 	return f, c
 } 
 

@@ -12,6 +12,7 @@ parser.add_argument('-show_plot', action='store_true')
 parser.add_argument('-save_plot', action='store')
 parser.add_argument('-binary_path', action='store')
 parser.add_argument('-commands', action='store')
+parser.add_argument('-dontrun', action='store_false')
 parser.add_argument('-shared', action='store')
 parser.add_argument('-labels', action='store')
 parser.add_argument('-files', action='store')
@@ -44,12 +45,13 @@ if args.binary_path and args.binary_path[-1] != '/': args.binary_path += '/'
 prefix = "" if args.binary_path is None else args.binary_path
 
 # Run commands
-for i in range(len(commands)):
-	revised_command = "time " + prefix + commands[i] + " -file=" + files[i]
-	if args.shared is not None:
-		revised_command = revised_command + " " + args.shared
-	print "running: " + revised_command
-	print subprocess.check_output(revised_command.split())
+if args.dontrun:
+	for i in range(len(commands)):
+		revised_command = "time " + prefix + commands[i] + " -file=" + files[i]
+		if args.shared is not None:
+			revised_command = revised_command + " " + args.shared
+		print "running: " + revised_command
+		print subprocess.check_output(revised_command.split())
 
 # Get distributions
 distributions = []
