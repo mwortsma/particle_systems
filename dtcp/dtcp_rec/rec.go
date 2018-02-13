@@ -5,6 +5,7 @@ import (
 	"github.com/mwortsma/particle_systems/matutil"
 	"github.com/mwortsma/particle_systems/probutil"
 	"github.com/mwortsma/particle_systems/dtmc"
+	"math"
 )
 
 func getQ(p,q float64,d int) func(int,int,matutil.Vec)float64 {
@@ -53,6 +54,10 @@ func Run(T,tau int, d int, p,q float64, nu float64) probutil.Distr {
 	j,_ := dtmc.DTMCRegtreeRecursions(T, tau, d, Q, nu_f)
 
 	f := make(probutil.Distr)
+
+	if tau < 0 {
+		tau = math.MaxInt32
+	}
 
 	states := matutil.BinaryMats(dtmc.Min(T,tau+1), d+1)
 	for _, state := range states {
