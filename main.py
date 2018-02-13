@@ -46,6 +46,7 @@ prefix = "" if args.binary_path is None else args.binary_path
 
 # Run commands
 if args.dontrun:
+	print 'running'
 	for i in range(len(commands)):
 		revised_command = "time " + prefix + commands[i] + " -file=" + files[i]
 		if args.shared is not None:
@@ -67,6 +68,8 @@ if args.save_plot or args.show_plot:
 		plot.plot_discrete(distributions, labels, args.show_plot, args.save_plot)
 	elif args.type == 'continuous':
 		plot.plot_continuous(distributions, labels, args.show_plot, args.save_plot)
+	elif args.type == 'error':
+		plot.plot_error(distributions, labels, args.show_plot, args.save_plot)
 
 
 # Delete the files if keep=True
