@@ -65,7 +65,10 @@ func main() {
 	mean_field_fp := flag.Bool("mean_field_fp", false, "Mean Field fixed point simulation.")
 	mean_field_recursion := flag.Bool("mean_field_recursion", false, "Mean Field simulation.")
 
+	rec_full := flag.Bool("rec_full", false, "rec_full")
 	rec := flag.Bool("rec", false, "rec")
+
+	full_tree_end := flag.Bool("full_tree_end", false, "Full sim on a regular tree")
 
 
 	d := flag.Int("d", -1, "degree of a noe")
@@ -135,8 +138,14 @@ func main() {
 	case *mean_field_recursion:
 		distr = dtcp_mean_field.RecursionTypicalDistr(*T, *p, *q, *nu, *steps)
 
+	case *rec_full:
+		distr = dtcp_rec.FullRun(*T,*tau, *d, *p,*q, *nu)
+
 	case *rec:
 		distr = dtcp_rec.Run(*T,*tau, *d, *p,*q, *nu)
+
+	case *full_tree_end:
+		distr = dtcp_full.RegTreeEndDistr(*T, *d, *p, *q, *nu, *steps)
 	}
 
 	b, err := json.Marshal(distr)

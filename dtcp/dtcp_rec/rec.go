@@ -59,7 +59,7 @@ func JointProb(T,tau int,d int, j []probutil.Distr,p []probutil.Distr, state mat
 
 }
 
-func Run(T,tau int, d int, p,q float64, nu float64) probutil.Distr {
+func FullRun(T,tau int, d int, p,q float64, nu float64) probutil.Distr {
 	
 	fmt.Println("Running")
 	nu_f := getNu(nu,d)
@@ -84,5 +84,44 @@ func Run(T,tau int, d int, p,q float64, nu float64) probutil.Distr {
 	}
 
 	return f
+}
 
+func Run(T,tau int, d int, p,q float64, nu float64) probutil.Distr {
+	
+	fmt.Println("Running")
+	
+	nu_f := func(v matutil.Vec) float64 {
+		prob := 1.0
+		for i := 0; i < len(v); i++ {
+			if v[i] == 1 {
+				prob *= (1-nu)
+			} else {
+				prob *= nu
+			}
+		}
+		return prob
+	}
+
+	Q := func(k int, s int, v matutil.Vec) float64 {
+		if s == 1 {
+			if k == 1 {
+				return 1-q
+			} else {
+				return q
+			}
+		} else {
+			sum_neighbors := 0
+			for i := 0; i < len(v); i++ {
+				sum_neighbors += v[i]
+			}
+			if k == 1 {
+				return (p/float64(d))*float64(sum_neighbors)
+			} else {
+				return 1-(p/float64(d))*float64(sum_neighbors)
+			}
+		}
+		return 0.0
+	}
+
+	return dtmc.DTMCRegtreeEndDistr(T, tau, d, Q, nu_f)
 }

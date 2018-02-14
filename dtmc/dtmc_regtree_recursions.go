@@ -9,6 +9,26 @@ import (
 
 type Transition func(int, int, matutil.Vec) float64
 
+func DTMCRegtreeEndDistr(T, tau int, d int, Q Transition, nu func(matutil.Vec) float64) probutil.Distr {
+
+	j := DTMCRegtreeRecursions(T, tau, d, Q, nu) 
+
+	f := make(probutil.Distr)
+
+	for k, prob := range(j) {
+		mat := matutil.StringToMat(k)
+		v := matutil.Vec(mat[0])
+		str := v[len(v)-1:].String()
+		if _, ok := f[str]; !ok {
+			f[str] = prob
+		} else {
+			f[str] += prob
+		}
+	}
+	return f
+}
+
+
 func DTMCRegtreeRecursionsFull(T, tau int, d int, Q Transition, nu func(matutil.Vec) float64) ([]probutil.Distr, []probutil.Distr) {
 
 	if tau < 0 {
@@ -74,7 +94,7 @@ func getJoint(t, tau int, d int, Q Transition, j probutil.Distr, c probutil.Cond
 
 	jnew := make(probutil.Distr)
 
-	conditional := make(probutil.Distr)
+	p := make(probutil.Distr)
 
 	l := Min(tau,t) + 1
 	r := Min(tau,t-1) + 1
@@ -91,7 +111,7 @@ func getJoint(t, tau int, d int, Q Transition, j probutil.Distr, c probutil.Cond
 			trimmed_str := trimmed.String()
 			if prob_prev == 0 {
 				jnew[trimmed.String()] = 0
-				conditional[full.String()] = 0
+				p[full.String()] = 0
 			} else {
 				lastrow := prev[len(prev)-1]
 				prob := 1.0
@@ -105,7 +125,7 @@ func getJoint(t, tau int, d int, Q Transition, j probutil.Distr, c probutil.Cond
 					}
 					prob *= sum_prob
 				}
-				conditional[full.String()] = prob
+				p[full.String()] = prob
 				prob *= prob_prev
 				if _, ok := jnew[trimmed_str]; !ok {
 					jnew[trimmed_str] = prob
@@ -117,7 +137,7 @@ func getJoint(t, tau int, d int, Q Transition, j probutil.Distr, c probutil.Cond
 		}
 	}
 
-	return jnew, conditional
+	return jnew, p
 }
 
 func getConditional(t, tau int, d int, jt probutil.Distr) probutil.Conditional {
