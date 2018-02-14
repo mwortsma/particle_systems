@@ -1,7 +1,7 @@
 package probutil
 
 import (
-	//"fmt"
+	// "fmt"
 	"github.com/mwortsma/particle_systems/matutil"
 	"math"
 	"sync"
@@ -51,7 +51,7 @@ func TypicalContDistrSync(
 				curr_time += dt
 			}
 
-			//fmt.Println("got", times, X, "out", cdistr)
+			// fmt.Println("got", times, X, "out", cdistr)
 		}()
 	}
 	wg.Wait()

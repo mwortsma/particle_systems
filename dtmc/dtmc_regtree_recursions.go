@@ -28,6 +28,29 @@ func DTMCRegtreeEndDistr(T, tau int, d int, Q Transition, nu func(matutil.Vec) f
 	return f
 }
 
+func DTMCRegtreeTDistr(T, tau int, d int, Q Transition, nu func(matutil.Vec) float64) probutil.Distr {
+
+	js, _ := DTMCRegtreeRecursionsFull(T, tau, d, Q, nu) 
+
+	// TODO 
+	/*
+	f := make(probutil.Distr)
+
+	for k, prob := range(j) {
+		mat := matutil.StringToMat(k)
+		v := matutil.Vec(mat[0])
+		str := v[len(v)-1:].String()
+		if _, ok := f[str]; !ok {
+			f[str] = prob
+		} else {
+			f[str] += prob
+		}
+	}
+	return f
+	*/
+	return
+}
+
 
 func DTMCRegtreeRecursionsFull(T, tau int, d int, Q Transition, nu func(matutil.Vec) float64) ([]probutil.Distr, []probutil.Distr) {
 

@@ -7,6 +7,10 @@ import (
 	"sync"
 )
 
+type GenDistr interface {
+	
+}
+
 // Distr, distance used for discrete time
 type Conditional map[string]map[string]float64
 type Distr map[string]float64

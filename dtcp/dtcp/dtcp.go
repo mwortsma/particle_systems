@@ -68,7 +68,7 @@ func main() {
 	rec_full := flag.Bool("rec_full", false, "rec_full")
 	rec := flag.Bool("rec", false, "rec")
 
-	full_tree_end := flag.Bool("full_tree_end", false, "Full sim on a regular tree")
+	full_tree_byt := flag.Bool("full_tree_byt", false, "Full sim on a regular tree")
 
 
 	d := flag.Int("d", -1, "degree of a noe")
@@ -102,7 +102,7 @@ func main() {
 
 	fmt.Println("Discrete Time Contact Process: ")
 
-	var distr probutil.Distr
+	var distr probutil.GenDistr
 
 	switch {
 	case *full_ring:
@@ -144,8 +144,8 @@ func main() {
 	case *rec:
 		distr = dtcp_rec.Run(*T,*tau, *d, *p,*q, *nu)
 
-	case *full_tree_end:
-		distr = dtcp_full.RegTreeEndDistr(*T, *d, *p, *q, *nu, *steps)
+	case *full_tree_byt:
+		distr = dtcp_full.RegTreeTDistr(*T, *d, *p, *q, *nu, *steps)
 	}
 
 	b, err := json.Marshal(distr)

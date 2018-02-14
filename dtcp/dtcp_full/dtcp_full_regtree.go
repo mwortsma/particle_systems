@@ -32,13 +32,18 @@ func RegTreeRealization(T, d int, p, q float64, nu float64) matutil.Vec {
 	return root.state
 }
 
-func RegTreeEndDistr(T, d int, p, q float64, nu float64, steps int) probutil.Distr {
+func RegTreeTDistr(T, d int, p, q float64, nu float64, steps int) probutil.ContDistr {
 	fmt.Println("Running Full Tree d =", d)
-	f := func() fmt.Stringer {
-		r := RegTreeRealization(T, d, p, q, nu)
-		return r[len(r)-1:]
+
+	t_array := make([]float64, T)
+	for i := 0; i < T; i++ {
+		t_array[i] = float64(i)
 	}
-	return probutil.TypicalDistrSync(f, steps)
+
+	f := func() ([]float64, matutil.Vec) {
+		return t_array, RegTreeRealization(T, d, p, q, nu)
+	}
+	return probutil.TypicalContDistrSync(f, 1, float64(T), 2, steps)
 }
 
 func RegTreeTypicalDistr(T, d int, p, q float64, nu float64, steps int) probutil.Distr {
