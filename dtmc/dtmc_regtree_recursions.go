@@ -9,13 +9,14 @@ import (
 
 type Transition func(int, int, matutil.Vec) float64
 
-func DTMCRegtreeRecursionsFull(T, tau int, d int, Q Transition, nu func(matutil.Vec) float64) []probutil.Distr {
+func DTMCRegtreeRecursionsFull(T, tau int, d int, Q Transition, nu func(matutil.Vec) float64) ([]probutil.Distr, []probutil.Distr) {
 
 	if tau < 0 {
 		tau = math.MaxInt32
 	}
 
 	j := make([]probutil.Distr, T)
+	p := make([]probutil.Distr, T)
 	j[0] = make(probutil.Distr)
 
 	// j := make(probutil.Distr)
@@ -30,16 +31,17 @@ func DTMCRegtreeRecursionsFull(T, tau int, d int, Q Transition, nu func(matutil.
 	for t := 1; t < T; t++ {
 
 		j[t] = make(probutil.Distr)
+		p[t] = make(probutil.Distr)
 
 		c = getConditional(t-1, tau, d, j[t-1])
 
-		j[t] = getJoint(t, tau, d, Q, j[t-1], c)
+		j[t], p[t] = getJoint(t, tau, d, Q, j[t-1], c)
 
 	}
 
 	fmt.Println("Exiting")
 
-	return j
+	return j, p
 }
 
 func DTMCRegtreeRecursions(T, tau int, d int, Q Transition, nu func(matutil.Vec) float64) probutil.Distr {
@@ -60,19 +62,19 @@ func DTMCRegtreeRecursions(T, tau int, d int, Q Transition, nu func(matutil.Vec)
 
 		c = getConditional(t-1, tau, d, j)
 
-		j = getJoint(t, tau, d, Q, j, c)
+		j, _ = getJoint(t, tau, d, Q, j, c)
 
 	}
 
 	return j
 }
 
-func getJoint(t, tau int, d int, Q Transition, j probutil.Distr, c probutil.Conditional) probutil.Distr {
+func getJoint(t, tau int, d int, Q Transition, j probutil.Distr, c probutil.Conditional) (probutil.Distr, probutil.Distr) {
 	fmt.Println("Obtaining joint at", t)
 
 	jnew := make(probutil.Distr)
 
-	conditional := make(map[string]float64)
+	conditional := make(probutil.Distr)
 
 	l := Min(tau,t) + 1
 	r := Min(tau,t-1) + 1
@@ -103,6 +105,7 @@ func getJoint(t, tau int, d int, Q Transition, j probutil.Distr, c probutil.Cond
 					}
 					prob *= sum_prob
 				}
+				fmt.Println(prob)
 				conditional[full.String()] = prob
 				prob *= prob_prev
 				if _, ok := jnew[trimmed_str]; !ok {
@@ -115,7 +118,7 @@ func getJoint(t, tau int, d int, Q Transition, j probutil.Distr, c probutil.Cond
 		}
 	}
 
-	return jnew
+	return jnew, conditional
 }
 
 func getConditional(t, tau int, d int, jt probutil.Distr) probutil.Conditional {

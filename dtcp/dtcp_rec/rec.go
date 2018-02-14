@@ -45,14 +45,16 @@ func getNu(nu float64,d int) func(v matutil.Vec)float64 {
 	}
 }
 
-func JointProb(T,tau int,d int, j []probutil.Distr,state matutil.Mat) float64{
+func JointProb(T,tau int,d int, j []probutil.Distr,p []probutil.Distr, state matutil.Mat) float64{
 	prob := 1.0
 	t := T-1
 	curr_j := j[t]
-	lastrows := matutil.BinaryStrings(d+1)
+	// lastrows := matutil.BinaryStrings(d+1)
 	for len(state) > tau + 1 {
+		rel_state := state[len(state)-(tau+2):]
+		/*
 		denom := 0.0
-		rel_state := state[len(state)-(tau+1):len(state)-1]
+		
 		for _, lastrow := range lastrows {
 			full := append(rel_state, lastrow)
 			denom += curr_j[full.String()]
@@ -62,6 +64,9 @@ func JointProb(T,tau int,d int, j []probutil.Distr,state matutil.Mat) float64{
 		} else {
 			return 0.0
 		}
+		*/
+		//fmt.Println(p[t][rel_state.String()])
+		prob *= p[t][rel_state.String()]
 		t = t - 1
 		curr_j = j[t]
 		state = state[0:len(state)-1]
@@ -77,7 +82,7 @@ func Run(T,tau int, d int, p,q float64, nu float64) probutil.Distr {
 	nu_f := getNu(nu,d)
 	Q := getQ(p,q,d)
 
-	j_array := dtmc.DTMCRegtreeRecursionsFull(T, tau, d, Q, nu_f)
+	j_array, p_array := dtmc.DTMCRegtreeRecursionsFull(T, tau, d, Q, nu_f)
 
 	for _, j := range j_array {
 		fmt.Println(j)
@@ -97,7 +102,7 @@ func Run(T,tau int, d int, p,q float64, nu float64) probutil.Distr {
 		if _, ok := f[path]; !ok {
 			f[path] = 0.0
 		}
-		f[path] += JointProb(T,tau,d,j_array,state)
+		f[path] += JointProb(T,tau,d,j_array,p_array,state)
 	}
 
 	return f
