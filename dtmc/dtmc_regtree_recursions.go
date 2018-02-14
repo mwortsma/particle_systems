@@ -105,7 +105,6 @@ func getJoint(t, tau int, d int, Q Transition, j probutil.Distr, c probutil.Cond
 					}
 					prob *= sum_prob
 				}
-				fmt.Println(prob)
 				conditional[full.String()] = prob
 				prob *= prob_prev
 				if _, ok := jnew[trimmed_str]; !ok {
