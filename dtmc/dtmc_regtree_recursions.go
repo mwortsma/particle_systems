@@ -9,38 +9,70 @@ import (
 
 type Transition func(int, int, matutil.Vec) float64
 
-func DTMCRegtreeRecursions(T, tau int, d int, Q Transition, nu func(matutil.Vec) float64) (probutil.Distr, probutil.Conditional) {
+func DTMCRegtreeRecursionsFull(T, tau int, d int, Q Transition, nu func(matutil.Vec) float64) []probutil.Distr {
 
 	if tau < 0 {
 		tau = math.MaxInt32
 	}
 
-	j := make(probutil.Distr)
+	j := make([]probutil.Distr, T)
+	j[0] = make(probutil.Distr)
+
+	// j := make(probutil.Distr)
 	var c probutil.Conditional
 
 	for _, init := range matutil.BinaryStrings(d+1) {
-		j[matutil.Mat([][]int{init}).String()] = nu(init)
+		j[0][matutil.Mat([][]int{init}).String()] = nu(init)
 	}
 
 	fmt.Println(j)
 
 	for t := 1; t < T; t++ {
 
-		c = getConditional(t-1, tau, d, j)
+		j[t] = make(probutil.Distr)
 
-		j = getJoint(t, tau, d, Q, j, c)
-		
+		c = getConditional(t-1, tau, d, j[t-1])
+
+		j[t] = getJoint(t, tau, d, Q, j[t-1], c)
+
 	}
 
 	fmt.Println("Exiting")
 
-	return j,c
+	return j
+}
+
+func DTMCRegtreeRecursions(T, tau int, d int, Q Transition, nu func(matutil.Vec) float64) probutil.Distr {
+
+	if tau < 0 {
+		tau = math.MaxInt32
+	}
+
+	j := make(probutil.Distr)
+
+	var c probutil.Conditional
+
+	for _, init := range matutil.BinaryStrings(d+1) {
+		j[matutil.Mat([][]int{init}).String()] = nu(init)
+	}
+
+	for t := 1; t < T; t++ {
+
+		c = getConditional(t-1, tau, d, j)
+
+		j = getJoint(t, tau, d, Q, j, c)
+
+	}
+
+	return j
 }
 
 func getJoint(t, tau int, d int, Q Transition, j probutil.Distr, c probutil.Conditional) probutil.Distr {
 	fmt.Println("Obtaining joint at", t)
 
 	jnew := make(probutil.Distr)
+
+	conditional := make(map[string]float64)
 
 	l := Min(tau,t) + 1
 	r := Min(tau,t-1) + 1
@@ -57,9 +89,10 @@ func getJoint(t, tau int, d int, Q Transition, j probutil.Distr, c probutil.Cond
 			trimmed_str := trimmed.String()
 			if prob_prev == 0 {
 				jnew[trimmed.String()] = 0
+				conditional[full.String()] = 0
 			} else {
 				lastrow := prev[len(prev)-1]
-				prob := prob_prev
+				prob := 1.0
 				prob *= Q(new_val[0], lastrow[0], lastrow[1:])
 				for i := 1; i < d+1; i++ {
 					sum_prob := 0.0
@@ -70,20 +103,17 @@ func getJoint(t, tau int, d int, Q Transition, j probutil.Distr, c probutil.Cond
 					}
 					prob *= sum_prob
 				}
+				conditional[full.String()] = prob
+				prob *= prob_prev
 				if _, ok := jnew[trimmed_str]; !ok {
 					jnew[trimmed_str] = prob
 				} else {
 					jnew[trimmed_str] += prob
 				}
+
 			}
 		}
 	}
-
-	x := 0.0
-	for _, v := range(jnew) {
-		x += v
-	}
-	fmt.Println(x)
 
 	return jnew
 }

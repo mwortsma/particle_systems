@@ -161,6 +161,7 @@ func BinaryStrings(n int) []Vec {
 
 func BinaryMats(r,c int) []Mat {
 	l := int(math.Pow(2.0, float64(r*c)))
+	fmt.Println(l)
 	s := make([]Mat, l)
 	strings := BinaryStrings(r*c)
 	for k, str := range strings {

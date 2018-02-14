@@ -45,27 +45,59 @@ func getNu(nu float64,d int) func(v matutil.Vec)float64 {
 	}
 }
 
+func JointProb(T,tau int,d int, j []probutil.Distr,state matutil.Mat) float64{
+	prob := 1.0
+	t := T-1
+	curr_j := j[t]
+	lastrows := matutil.BinaryStrings(d+1)
+	for len(state) > tau + 1 {
+		denom := 0.0
+		rel_state := state[len(state)-(tau+1):len(state)-1]
+		for _, lastrow := range lastrows {
+			full := append(rel_state, lastrow)
+			denom += curr_j[full.String()]
+		}
+		if denom > 0 {
+			prob *= curr_j[state[len(state)-(tau+1):].String()]/denom
+		} else {
+			return 0.0
+		}
+		t = t - 1
+		curr_j = j[t]
+		state = state[0:len(state)-1]
+	}
+	prob *= curr_j[state.String()]
+	return prob
+
+}
+
 func Run(T,tau int, d int, p,q float64, nu float64) probutil.Distr {
 	
 	fmt.Println("Running")
 	nu_f := getNu(nu,d)
 	Q := getQ(p,q,d)
 
-	j,_ := dtmc.DTMCRegtreeRecursions(T, tau, d, Q, nu_f)
+	j_array := dtmc.DTMCRegtreeRecursionsFull(T, tau, d, Q, nu_f)
+
+	for _, j := range j_array {
+		fmt.Println(j)
+		fmt.Println("\n")
+	}
 
 	f := make(probutil.Distr)
 
 	if tau < 0 {
 		tau = math.MaxInt32
 	}
+	fmt.Println("T is ", T)
 
-	states := matutil.BinaryMats(dtmc.Min(T,tau+1), d+1)
+	states := matutil.BinaryMats(T, d+1)
 	for _, state := range states {
 		path := state.Col(0).String()
 		if _, ok := f[path]; !ok {
 			f[path] = 0.0
 		}
-		f[path] += j[state.String()]
+		f[path] += JointProb(T,tau,d,j_array,state)
 	}
 
 	return f
