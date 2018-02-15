@@ -65,7 +65,7 @@ func FullRun(T,tau int, d int, p,q float64, nu float64) probutil.Distr {
 	nu_f := getNu(nu,d)
 	Q := getQ(p,q,d)
 
-	j_array, p_array := dtmc.DTMCRegtreeRecursionsFull(T, tau, d, Q, nu_f)
+	j_array, p_array := dtmc.DTMCRegtreeRecursionsFull(T, tau, d, Q, nu_f,2)
 
 	f := make(probutil.Distr)
 
@@ -86,10 +86,10 @@ func FullRun(T,tau int, d int, p,q float64, nu float64) probutil.Distr {
 	return f
 }
 
-func Run(T,tau int, d int, p,q float64, nu float64) probutil.Distr {
+func Run(T,tau int, d int, p,q float64, nu float64) probutil.ContDistr {
 	
 	fmt.Println("Running")
-	
+
 	nu_f := func(v matutil.Vec) float64 {
 		prob := 1.0
 		for i := 0; i < len(v); i++ {
@@ -123,5 +123,5 @@ func Run(T,tau int, d int, p,q float64, nu float64) probutil.Distr {
 		return 0.0
 	}
 
-	return dtmc.DTMCRegtreeEndDistr(T, tau, d, Q, nu_f)
+	return dtmc.DTMCRegtreeTDistr(T, tau, d, Q, nu_f,2)
 }

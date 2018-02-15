@@ -9,15 +9,15 @@ import (
 
 type Transition func(int, int, matutil.Vec) float64
 
-func DTMCRegtreeEndDistr(T, tau int, d int, Q Transition, nu func(matutil.Vec) float64) probutil.Distr {
+func DTMCRegtreeEndDistr(T, tau int, d int, Q Transition, nu func(matutil.Vec) float64, k int) probutil.Distr {
 
-	j := DTMCRegtreeRecursions(T, tau, d, Q, nu) 
+	j := DTMCRegtreeRecursions(T, tau, d, Q, nu, k) 
 
 	f := make(probutil.Distr)
 
 	for k, prob := range(j) {
 		mat := matutil.StringToMat(k)
-		v := matutil.Vec(mat[0])
+		v := matutil.Vec(mat.Col(0))
 		str := v[len(v)-1:].String()
 		if _, ok := f[str]; !ok {
 			f[str] = prob
@@ -28,31 +28,27 @@ func DTMCRegtreeEndDistr(T, tau int, d int, Q Transition, nu func(matutil.Vec) f
 	return f
 }
 
-func DTMCRegtreeTDistr(T, tau int, d int, Q Transition, nu func(matutil.Vec) float64) probutil.Distr {
+func DTMCRegtreeTDistr(T, tau int, d int, Q Transition, nu func(matutil.Vec) float64, k int) probutil.ContDistr {
 
-	js, _ := DTMCRegtreeRecursionsFull(T, tau, d, Q, nu) 
+	js, _ := DTMCRegtreeRecursionsFull(T, tau, d, Q, nu, k) 
 
-	// TODO 
-	/*
-	f := make(probutil.Distr)
-
-	for k, prob := range(j) {
-		mat := matutil.StringToMat(k)
-		v := matutil.Vec(mat[0])
-		str := v[len(v)-1:].String()
-		if _, ok := f[str]; !ok {
-			f[str] = prob
-		} else {
-			f[str] += prob
+	f := make([][]float64, T)
+	t := 0
+	for _, j := range js {
+		f[t] = make([]float64, k)
+		for k, prob := range j {
+			mat := matutil.StringToMat(k)
+			v := matutil.Vec(mat.Col(0))
+			f[t][v[len(v)-1]] += prob
 		}
+		t += 1;
 	}
-	return f
-	*/
-	return
+
+	return probutil.ContDistr{1, float64(T), k, f}
 }
 
 
-func DTMCRegtreeRecursionsFull(T, tau int, d int, Q Transition, nu func(matutil.Vec) float64) ([]probutil.Distr, []probutil.Distr) {
+func DTMCRegtreeRecursionsFull(T, tau int, d int, Q Transition, nu func(matutil.Vec) float64, k int) ([]probutil.Distr, []probutil.Distr) {
 
 	if tau < 0 {
 		tau = math.MaxInt32
@@ -76,9 +72,9 @@ func DTMCRegtreeRecursionsFull(T, tau int, d int, Q Transition, nu func(matutil.
 		j[t] = make(probutil.Distr)
 		p[t] = make(probutil.Distr)
 
-		c = getConditional(t-1, tau, d, j[t-1])
+		c = getConditional(t-1, tau, d, j[t-1], k)
 
-		j[t], p[t] = getJoint(t, tau, d, Q, j[t-1], c)
+		j[t], p[t] = getJoint(t, tau, d, Q, j[t-1], c, k)
 
 	}
 
@@ -87,7 +83,7 @@ func DTMCRegtreeRecursionsFull(T, tau int, d int, Q Transition, nu func(matutil.
 	return j, p
 }
 
-func DTMCRegtreeRecursions(T, tau int, d int, Q Transition, nu func(matutil.Vec) float64) probutil.Distr {
+func DTMCRegtreeRecursions(T, tau int, d int, Q Transition, nu func(matutil.Vec) float64, k int) probutil.Distr {
 
 	if tau < 0 {
 		tau = math.MaxInt32
@@ -103,16 +99,16 @@ func DTMCRegtreeRecursions(T, tau int, d int, Q Transition, nu func(matutil.Vec)
 
 	for t := 1; t < T; t++ {
 
-		c = getConditional(t-1, tau, d, j)
+		c = getConditional(t-1, tau, d, j, k)
 
-		j, _ = getJoint(t, tau, d, Q, j, c)
+		j, _ = getJoint(t, tau, d, Q, j, c, k)
 
 	}
 
 	return j
 }
 
-func getJoint(t, tau int, d int, Q Transition, j probutil.Distr, c probutil.Conditional) (probutil.Distr, probutil.Distr) {
+func getJoint(t, tau int, d int, Q Transition, j probutil.Distr, c probutil.Conditional, k int) (probutil.Distr, probutil.Distr) {
 	fmt.Println("Obtaining joint at", t)
 
 	jnew := make(probutil.Distr)
@@ -163,7 +159,7 @@ func getJoint(t, tau int, d int, Q Transition, j probutil.Distr, c probutil.Cond
 	return jnew, p
 }
 
-func getConditional(t, tau int, d int, jt probutil.Distr) probutil.Conditional {
+func getConditional(t, tau int, d int, jt probutil.Distr, k int) probutil.Conditional {
 	fmt.Println("Obtaining Conditional at", t)
 
 	ct := make(probutil.Conditional)
