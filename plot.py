@@ -36,6 +36,48 @@ def plot_continuous(distributions, labels, show, save):
 	if save and save != "":
 		plt.savefig(save)
 
+def plot_guess(distributions, labels, show, save):
+	for i in range(len(distributions)):
+		d = distributions[i]
+		k = d['K']
+		arr = np.array(d['Distr'])
+		for j in range(k-1):
+			print len(np.arange(0, len(arr[50:,j])*d['Dt'],d['Dt']))
+			print len(arr[:,j])
+			plt.plot(np.arange(50, 50+len(arr[50:,j])*d['Dt'],d['Dt']), arr[50:,j], label=(labels[i]+" P(X="+str(j))+")")
+	
+	f0 = np.array(distributions[1]['Distr'])
+	f0 = f0[50:,0]
+	f1 = np.array(distributions[2]['Distr'])
+	f1 = f1[50:,0]
+	f2 = np.array(distributions[3]['Distr'])
+	f2 = f2[50:,0]
+
+	d1 = abs(f1-f0)
+	d2 = abs(f2-f1)
+	k = (d2/d1)
+
+	guess1 = f2 + d2*(1/(1-k))
+
+	real = np.array(distributions[0]['Distr'])
+	real = np.mean(real[100:,0])
+	print real - guess1[-1]
+
+
+
+
+
+	d = distributions[0]
+	plt.plot(np.arange(50, 50+len(arr[50:,j])*d['Dt'],d['Dt']), guess1, label="guess" )
+	plt.plot(np.arange(50, 50+len(arr[50:,j])*d['Dt'],d['Dt']), real*np.ones((150,1)), label="mean" )
+
+
+	plt.legend(loc=2)
+	if show:
+		plt.show()
+	if save and save != "":
+		plt.savefig(save)
+
 '''
 def plot_error(distributions, labels, show, save):
 	truth = np.array(distributions[0]['Distr'])

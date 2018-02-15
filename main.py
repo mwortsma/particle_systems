@@ -78,6 +78,8 @@ if args.save_plot or args.show_plot:
 		plot.plot_error_fraction(distributions, labels, args.show_plot, args.save_plot)
 	elif args.type == 'relative_error':
 		plot.plot_relative_error(distributions, labels, args.show_plot, args.save_plot)
+	elif args.type == 'guess':
+		plot.plot_guess(distributions, labels, args.show_plot, args.save_plot)
 
 
 # Delete the files if keep=True
