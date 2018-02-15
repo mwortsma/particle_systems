@@ -74,6 +74,10 @@ if args.save_plot or args.show_plot:
 		plot.plot_error_all_pairs(distributions, labels, args.show_plot, args.save_plot)
 	elif args.type == 'error_consecutive_pairs':
 		plot.plot_error_consecutive_pairs(distributions, labels, args.show_plot, args.save_plot)
+	elif args.type == 'error_fraction':
+		plot.plot_error_fraction(distributions, labels, args.show_plot, args.save_plot)
+	elif args.type == 'relative_error':
+		plot.plot_relative_error(distributions, labels, args.show_plot, args.save_plot)
 
 
 # Delete the files if keep=True
