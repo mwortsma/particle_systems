@@ -23,6 +23,6 @@ func TestMat(t *testing.T) {
 }
 
 
-func TestBin(t *testing.T) {
-	matutil.Concat([]int{0,3},[][]int{[]int{1,2}, []int{4,5}}).Print()
+func TestQ(t *testing.T) {
+	t.Log(matutil.QStrings(2,4))
 }

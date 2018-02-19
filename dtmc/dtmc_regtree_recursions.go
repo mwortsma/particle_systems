@@ -61,11 +61,9 @@ func DTMCRegtreeRecursionsFull(T, tau int, d int, Q Transition, nu func(matutil.
 	// j := make(probutil.Distr)
 	var c probutil.Conditional
 
-	for _, init := range matutil.BinaryStrings(d+1) {
+	for _, init := range matutil.QStrings(d+1,k) {
 		j[0][matutil.Mat([][]int{init}).String()] = nu(init)
 	}
-
-	fmt.Println(j)
 
 	for t := 1; t < T; t++ {
 
@@ -93,7 +91,7 @@ func DTMCRegtreeRecursions(T, tau int, d int, Q Transition, nu func(matutil.Vec)
 
 	var c probutil.Conditional
 
-	for _, init := range matutil.BinaryStrings(d+1) {
+	for _, init := range matutil.QStrings(d+1,k) {
 		j[matutil.Mat([][]int{init}).String()] = nu(init)
 	}
 
@@ -118,9 +116,9 @@ func getJoint(t, tau int, d int, Q Transition, j probutil.Distr, c probutil.Cond
 	l := Min(tau,t) + 1
 	r := Min(tau,t-1) + 1
 
-	prev_vals := matutil.BinaryMats(r,d+1)
-	new_vals := matutil.BinaryStrings(d+1)
-	other_children_vals := matutil.BinaryStrings(d-1)
+	prev_vals := matutil.QMats(r,d+1,k)
+	new_vals := matutil.QStrings(d+1,k)
+	other_children_vals := matutil.QStrings(d-1,k)
 
 	for _, prev := range prev_vals {
 		prob_prev := j[prev.String()]
@@ -166,8 +164,8 @@ func getConditional(t, tau int, d int, jt probutil.Distr, k int) probutil.Condit
 
 	l := Min(tau,t) + 1
 
-	history_vals := matutil.BinaryMats(l,2)
-	children_vals := matutil.BinaryMats(l,d-1)
+	history_vals := matutil.QMats(l,2,k)
+	children_vals := matutil.QMats(l,d-1,k)
 
 
 	for _, history := range history_vals {

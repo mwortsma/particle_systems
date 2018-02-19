@@ -174,6 +174,35 @@ func BinaryMats(r,c int) []Mat {
 	return s
 }
 
+func QStrings(n int, q int) []Vec {
+	s := make([]Vec, int(math.Pow(float64(q), float64(n))))
+	for i := 0; i < int(math.Pow(float64(q), float64(n))); i++ {
+		b := []byte(string(strconv.FormatInt(int64(i), q)))
+		a := make(Vec, n)
+		for j := 0; j < len(b); j++ {
+			a[j] = int(b[len(b)-j-1]-48)
+		}
+		s[i] = a
+	}
+	return s
+}
+
+func QMats(r,c int, q int) []Mat {
+	l := int(math.Pow(float64(q), float64(r*c)))
+	s := make([]Mat, l)
+	strings := QStrings(r*c, q)
+	for k, str := range strings {
+		s[k] = Create(r,c)
+		for i := 0; i < r; i ++ {
+			for j := 0; j < c; j++ {
+				s[k][i][j] = str[c*i + j]
+			}
+		}
+	}
+	return s
+}
+
+
 func Concat(m1 Mat, m2 Mat) Mat {
 	rows, cols := m1.Dims()
 	_, cols2 := m2.Dims()
