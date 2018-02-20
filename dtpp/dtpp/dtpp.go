@@ -13,6 +13,9 @@ import (
 func main() {
 
 	rec := flag.Bool("rec", false, "rec")
+	rec_end := flag.Bool("rec_end", false, "rec")
+	rec_full_end := flag.Bool("rec_full_end", false, "rec")
+
 
 	d := flag.Int("d", 2, "degree of a noe")
 	n := flag.Int("n", 10, "number of nodes")
@@ -35,6 +38,10 @@ func main() {
 
 	case *rec:
 		distr = dtpp_local.Run(*T,*tau, *d, *beta,*k, *n)
+	case *rec_end:
+		distr = dtpp_local.EndRun(*T,*tau, *d, *beta,*k, *n)
+	case *rec_full_end:
+		distr = dtpp_local.FullEndRun(*T,*tau, *d, *beta,*k, *n)
 	}
 
 	b, err := json.Marshal(distr)
