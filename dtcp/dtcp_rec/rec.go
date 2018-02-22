@@ -24,7 +24,7 @@ func getQ(p,q float64,d int) func(int,int,matutil.Vec)float64 {
 			if k == 1 {
 				return (p/float64(d))*float64(sum_neighbors)
 			} else {
-				return 1-(p/float64(d))*float64(sum_neighbors)
+				return 1.0-(p/float64(d))*float64(sum_neighbors)
 			}
 		}
 		return 0.0
@@ -117,7 +117,7 @@ func Run(T,tau int, d int, p,q float64, nu float64) probutil.ContDistr {
 			if k == 1 {
 				return (p/float64(d))*float64(sum_neighbors)
 			} else {
-				return 1-(p/float64(d))*float64(sum_neighbors)
+				return 1.0-(p/float64(d))*float64(sum_neighbors)
 			}
 		}
 		return 0.0

@@ -67,6 +67,9 @@ func DTMCRegtreeRecursionsFull(T, tau int, d int, Q Transition, nu func(matutil.
 
 	for t := 1; t < T; t++ {
 
+		//fmt.Println(j[t-1])
+		//fmt.Println("\n")
+
 		j[t] = make(probutil.Distr)
 		p[t] = make(probutil.Distr)
 
@@ -75,6 +78,8 @@ func DTMCRegtreeRecursionsFull(T, tau int, d int, Q Transition, nu func(matutil.
 		j[t], p[t] = getJoint(t, tau, d, Q, j[t-1], c, k)
 
 	}
+
+	//fmt.Println(j[T-1])
 
 	fmt.Println("Exiting")
 
@@ -126,30 +131,24 @@ func getJoint(t, tau int, d int, Q Transition, j probutil.Distr, c probutil.Cond
 			full := append(prev, new_val)
 			trimmed := full[len(full)-l:]
 			trimmed_str := trimmed.String()
-			if prob_prev == 0 {
-				jnew[trimmed.String()] = 0
-				p[full.String()] = 0
+			lastrow := prev[len(prev)-1]
+			prob := 1.0
+			prob *= Q(new_val[0], lastrow[0], lastrow[1:])
+			for i := 1; i < d+1; i++ {
+				sum_prob := 0.0
+				for _, other_children := range other_children_vals {
+					hist := prev.Cols([]int{i,0}).String()
+					sum_prob += c[hist][other_children.String()]*
+						Q(new_val[i], lastrow[i], append(other_children, lastrow[0]))
+				}
+				prob *= sum_prob
+			}
+			p[full.String()] = prob
+			prob *= prob_prev
+			if _, ok := jnew[trimmed_str]; !ok {
+				jnew[trimmed_str] = prob
 			} else {
-				lastrow := prev[len(prev)-1]
-				prob := 1.0
-				prob *= Q(new_val[0], lastrow[0], lastrow[1:])
-				for i := 1; i < d+1; i++ {
-					sum_prob := 0.0
-					for _, other_children := range other_children_vals {
-						hist := prev.Cols([]int{i,0})
-						sum_prob += c[hist.String()][other_children.String()]*
-							Q(new_val[i], lastrow[i], append(other_children, lastrow[0]))
-					}
-					prob *= sum_prob
-				}
-				p[full.String()] = prob
-				prob *= prob_prev
-				if _, ok := jnew[trimmed_str]; !ok {
-					jnew[trimmed_str] = prob
-				} else {
-					jnew[trimmed_str] += prob
-				}
-
+				jnew[trimmed_str] += prob	
 			}
 		}
 	}
@@ -176,16 +175,18 @@ func getConditional(t, tau int, d int, jt probutil.Distr, k int) probutil.Condit
 			full := matutil.Concat(history, children)
 			denom += jt[full.String()]
 		}
+		// Important
+		if denom == 0 {
+			continue
+		}
 		for _, children := range children_vals {
 			lastrow := matutil.Vec(children[l-1]).String()
 			// TODO: debug
 			if _, ok := ct[hist_str][lastrow]; !ok {
 				ct[hist_str][lastrow] = 0
 			}
-			if denom > 0 {
-				full := matutil.Concat(history, children)
-				ct[hist_str][lastrow] += jt[full.String()]/denom
-			}
+			full := matutil.Concat(history, children)
+			ct[hist_str][lastrow] += jt[full.String()]/denom
 		}
 	}
 		

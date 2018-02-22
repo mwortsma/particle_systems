@@ -36,6 +36,21 @@ def plot_continuous(distributions, labels, show, save):
 	if save and save != "":
 		plt.savefig(save)
 
+def plot_continuous2(distributions, labels, show, save):
+	for i in range(len(distributions)):
+		d = distributions[i]
+		k = d['K']
+		arr = np.array(d['Distr'])
+		for j in range(k):
+			print len(np.arange(0, len(arr[:,j])*d['Dt'],d['Dt']))
+			print len(arr[:,j])
+			plt.plot(np.arange(0, len(arr[:,j])*d['Dt'],d['Dt']), arr[:,j], label=(labels[i]+" P(X="+str(j))+")")
+	plt.legend(loc=2)
+	if show:
+		plt.show()
+	if save and save != "":
+		plt.savefig(save)
+
 def plot_guess(distributions, labels, show, save):
 	for i in range(len(distributions)):
 		d = distributions[i]

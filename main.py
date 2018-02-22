@@ -68,6 +68,8 @@ if args.save_plot or args.show_plot:
 		plot.plot_discrete(distributions, labels, args.show_plot, args.save_plot)
 	elif args.type == 'continuous':
 		plot.plot_continuous(distributions, labels, args.show_plot, args.save_plot)
+	elif args.type == 'continuous2':
+		plot.plot_continuous2(distributions, labels, args.show_plot, args.save_plot)
 	elif args.type == 'error':
 		plot.plot_error(distributions, labels, args.show_plot, args.save_plot)
 	elif args.type == 'error_all_pairs':
