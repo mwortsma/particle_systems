@@ -123,3 +123,46 @@ func Run(T,tau int, d int, p,q float64, nu []float64) probutil.ContDistr {
 
 	return dtmc.DTMCRegtreeTDistr(T, tau, d, Q, nu_f,3)
 }
+
+func EndRun(T,tau int, d int, p,q float64, nu []float64) probutil.Distr {
+
+	nu_f := func(v matutil.Vec) float64 {
+		prob := 1.0
+		for i := 0; i < len(v); i++ {
+			prob *= nu[v[i]]
+		}
+		return prob
+	}
+
+	Q := func(k int, s int, v matutil.Vec) float64 {
+		if s == 0 {
+			sum_neighbors := 0
+			for i := 0; i < len(v); i++ {
+				if v[i] == 1 {
+					sum_neighbors += v[i]
+				}
+			}
+			if k == 1 {
+				return (p/float64(d))*float64(sum_neighbors)
+			} else if k == 0 {
+				return 1-(p/float64(d))*float64(sum_neighbors)
+			}
+		} else if s == 1 {
+			if k == 1 {
+				return 1-q
+			} else if k == 2 {
+				return q
+			}
+		} else if s == 2 {
+			if k == 2 {
+				return 1.0
+			}
+		}
+		return 0.0
+	}
+
+	return dtmc.DTMCRegtreeEndDistr(T, tau, d, Q, nu_f,3)
+}
+
+
+

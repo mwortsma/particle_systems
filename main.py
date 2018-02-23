@@ -60,6 +60,7 @@ for f in files:
 	with open(f) as json_data:
 		d = json.load(json_data)
 		distributions.append(d)
+print len(distributions)
 
 # Plot
 if args.save_plot or args.show_plot:

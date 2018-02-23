@@ -16,6 +16,35 @@ type node struct {
 	is_root  bool
 }
 
+func RegTreeEndDistrHelper(T,d int, p,q float64, nu []float64) matutil.Vec {
+	r := rand.New(rand.NewSource(uint64(time.Now().UnixNano())))
+
+	// create tree
+	var root node
+	root.createNode(T, d, nu, &node{}, T-1, true, r)
+
+	for t := 1; t < T; t++ {
+		// transition will be called for the whole tree recursively
+		root.transition(t, d, p, q, r)
+	}
+
+	v := make([]int, 0)
+	v = append(v, root.state[T-1])
+	for _, c := range root.children {
+		v = append(v, c.state[T-1])
+	}
+
+	return v
+}
+
+func RegTreeEndDistr(T, d int, p, q float64, nu []float64, steps int) probutil.Distr {
+	fmt.Println("Running Full Tree d =", d)
+	f := func() fmt.Stringer {
+		return RegTreeEndDistrHelper(T, d, p, q, nu)
+	}
+	return probutil.TypicalDistrSync(f, steps)
+}
+
 
 func RegTreeRealization(T, d int, p, q float64, nu []float64) matutil.Vec {
 	// Ger random number to be used throughout
@@ -47,15 +76,14 @@ func RegTreeTDistr(T, d int, p, q float64, nu []float64, steps int) probutil.Con
 	return probutil.TypicalContDistrSync(f, 1, float64(T), 3, steps)
 }
 
+
+
 func RegTreeTypicalDistr(T, d int, p, q float64, nu []float64, steps int) probutil.Distr {
 	fmt.Println("Running Full Tree d =", d)
 	f := func() fmt.Stringer {
 		return RegTreeRealization(T, d, p, q, nu)
 	}
-	// TODO
-	TODO := probutil.TypicalDistrSync(f, steps)
-	fmt.Println(TODO)
-	return TODO
+	return probutil.TypicalDistrSync(f, steps)
 }
 
 // Helpers

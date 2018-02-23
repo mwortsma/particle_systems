@@ -17,14 +17,15 @@ func DTMCRegtreeEndDistr(T, tau int, d int, Q Transition, nu func(matutil.Vec) f
 
 	for k, prob := range(j) {
 		mat := matutil.StringToMat(k)
-		v := matutil.Vec(mat.Col(0))
-		str := v[len(v)-1:].String()
+		v := matutil.Vec(mat[len(mat)-1])
+		str := v.String()
 		if _, ok := f[str]; !ok {
 			f[str] = prob
 		} else {
 			f[str] += prob
 		}
 	}
+
 	return f
 }
 
