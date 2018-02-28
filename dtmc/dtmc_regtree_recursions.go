@@ -9,108 +9,10 @@ import (
 
 type Transition func(int, int, matutil.Vec) float64
 
-func DTMCRegtreeEndDistr(T, tau int, d int, Q Transition, nu func(matutil.Vec) float64, k int) probutil.Distr {
 
-	j := DTMCRegtreeRecursions(T, tau, d, Q, nu, k) 
-
-	f := make(probutil.Distr)
-
-	for k, prob := range(j) {
-		mat := matutil.StringToMat(k)
-		v := matutil.Vec(mat[len(mat)-1])
-		str := v.String()
-		if _, ok := f[str]; !ok {
-			f[str] = prob
-		} else {
-			f[str] += prob
-		}
-	}
-
-	return f
-}
-
-func DTMCRegtreeTDistr(T, tau int, d int, Q Transition, nu func(matutil.Vec) float64, k int) probutil.ContDistr {
-
-	js, _ := DTMCRegtreeRecursionsFull(T, tau, d, Q, nu, k) 
-
-	f := make([][]float64, T)
-	t := 0
-	for _, j := range js {
-		f[t] = make([]float64, k)
-		for k, prob := range j {
-			mat := matutil.StringToMat(k)
-			v := matutil.Vec(mat.Col(0))
-			f[t][v[len(v)-1]] += prob
-		}
-		t += 1;
-	}
-
-	return probutil.ContDistr{1, float64(T), k, f}
-}
-
-
-func DTMCRegtreeRecursionsFull(T, tau int, d int, Q Transition, nu func(matutil.Vec) float64, k int) ([]probutil.Distr, []probutil.Distr) {
-
-	if tau < 0 {
-		tau = math.MaxInt32
-	}
-
-	j := make([]probutil.Distr, T)
-	p := make([]probutil.Distr, T)
-	j[0] = make(probutil.Distr)
-
-	// j := make(probutil.Distr)
-	var c probutil.Conditional
-
-	for _, init := range matutil.QStrings(d+1,k) {
-		j[0][matutil.Mat([][]int{init}).String()] = nu(init)
-	}
-
-	for t := 1; t < T; t++ {
-
-		//fmt.Println(j[t-1])
-		//fmt.Println("\n")
-
-		j[t] = make(probutil.Distr)
-		p[t] = make(probutil.Distr)
-
-		c = getConditional(t-1, tau, d, j[t-1], k)
-
-		j[t], p[t] = getJoint(t, tau, d, Q, j[t-1], c, k)
-
-	}
-
-	//fmt.Println(j[T-1])
-
-	fmt.Println("Exiting")
-
-	return j, p
-}
-
-func DTMCRegtreeRecursions(T, tau int, d int, Q Transition, nu func(matutil.Vec) float64, k int) probutil.Distr {
-
-	if tau < 0 {
-		tau = math.MaxInt32
-	}
-
-	j := make(probutil.Distr)
-
-	var c probutil.Conditional
-
-	for _, init := range matutil.QStrings(d+1,k) {
-		j[matutil.Mat([][]int{init}).String()] = nu(init)
-	}
-
-	for t := 1; t < T; t++ {
-
-		c = getConditional(t-1, tau, d, j, k)
-
-		j, _ = getJoint(t, tau, d, Q, j, c, k)
-
-	}
-
-	return j
-}
+/////////////////////////////////////////////////////////////////////
+/////					The Main Algorithm						/////
+/////////////////////////////////////////////////////////////////////
 
 func getJoint(t, tau int, d int, Q Transition, j probutil.Distr, c probutil.Conditional, k int) (probutil.Distr, probutil.Distr) {
 	fmt.Println("Obtaining joint at", t)
@@ -192,6 +94,154 @@ func getConditional(t, tau int, d int, jt probutil.Distr, k int) probutil.Condit
 	}
 		
 	return ct
+}
+
+
+/////////////////////////////////////////////////////////////////////
+/////				Shortened, Scalable Version 				/////
+/////////////////////////////////////////////////////////////////////
+
+// Gets the distriution over the local neighborhood at the end
+func DTMCRegtreeEndDistr(T, tau int, d int, Q Transition, nu func(matutil.Vec) float64, k int) probutil.Distr {
+
+	j := DTMCRegtreeRecursions(T, tau, d, Q, nu, k) 
+
+	f := make(probutil.Distr)
+
+	for k, prob := range(j) {
+		mat := matutil.StringToMat(k)
+		v := matutil.Vec(mat[len(mat)-1])
+		str := v.String()
+		if _, ok := f[str]; !ok {
+			f[str] = prob
+		} else {
+			f[str] += prob
+		}
+	}
+
+	return f
+}
+
+// Returns the last joint distribution.
+func DTMCRegtreeRecursions(T, tau int, d int, Q Transition, nu func(matutil.Vec) float64, k int) probutil.Distr {
+
+	if tau < 0 {
+		tau = math.MaxInt32
+	}
+
+	j := make(probutil.Distr)
+
+	var c probutil.Conditional
+
+	for _, init := range matutil.QStrings(d+1,k) {
+		j[matutil.Mat([][]int{init}).String()] = nu(init)
+	}
+
+	for t := 1; t < T; t++ {
+
+		c = getConditional(t-1, tau, d, j, k)
+
+		j, _ = getJoint(t, tau, d, Q, j, c, k)
+
+	}
+
+	return j
+}
+
+
+/////////////////////////////////////////////////////////////////////
+/////					  Full Version 				            /////
+/////////////////////////////////////////////////////////////////////
+
+
+func DTMCRegtreeTDistr(T, tau int, d int, Q Transition, nu func(matutil.Vec) float64, k int) probutil.ContDistr {
+
+	js, _ := DTMCRegtreeRecursionsFull(T, tau, d, Q, nu, k) 
+
+	f := make([][]float64, T)
+	t := 0
+	for _, j := range js {
+		f[t] = make([]float64, k)
+		for k, prob := range j {
+			mat := matutil.StringToMat(k)
+			v := matutil.Vec(mat.Col(0))
+			f[t][v[len(v)-1]] += prob
+		}
+		t += 1;
+	}
+
+	return probutil.ContDistr{1, float64(T), k, f}
+}
+
+
+// This is equivelant to DTMCRegtreeRecursions except for that returns j for all t and c for all t
+func DTMCRegtreeRecursionsFull(T, tau int, d int, Q Transition, nu func(matutil.Vec) float64, k int) ([]probutil.Distr, []probutil.Distr) {
+
+	if tau < 0 {
+		tau = math.MaxInt32
+	}
+
+	j := make([]probutil.Distr, T)
+	p := make([]probutil.Distr, T)
+	j[0] = make(probutil.Distr)
+
+	var c probutil.Conditional
+
+	for _, init := range matutil.QStrings(d+1,k) {
+		j[0][matutil.Mat([][]int{init}).String()] = nu(init)
+	}
+
+	for t := 1; t < T; t++ {
+
+		j[t] = make(probutil.Distr)
+		p[t] = make(probutil.Distr)
+
+		c = getConditional(t-1, tau, d, j[t-1], k)
+
+		j[t], p[t] = getJoint(t, tau, d, Q, j[t-1], c, k)
+
+	}
+
+	fmt.Println("Exiting")
+
+	return j, p
+}
+
+// Untested
+func JointProb(T,tau int,d int, j []probutil.Distr,p []probutil.Distr, state matutil.Mat) float64{
+	prob := 1.0
+	t := T-1
+	for len(state) > tau + 1 {
+		rel_state := state[len(state)-(tau+2):]
+		prob *= p[t][rel_state.String()]
+		t = t - 1
+		state = state[0:len(state)-1]
+	}
+	prob *= j[t][state.String()]
+	return prob
+
+}
+
+func FullRun(T,tau int, d int, Q Transition, nu func(matutil.Vec) float64, k int) probutil.Distr {
+
+	j_array, p_array := DTMCRegtreeRecursionsFull(T, tau, d, Q, nu,k)
+
+	f := make(probutil.Distr)
+
+	if tau < 0 {
+		tau = math.MaxInt32
+	}
+
+	states := matutil.QMats(T, d+1, k)
+	for _, state := range states {
+		path := state.Col(0).String()
+		if _, ok := f[path]; !ok {
+			f[path] = 0.0
+		}
+		f[path] += JointProb(T,tau,d,j_array,p_array,state)
+	}
+
+	return f
 }
 
 
