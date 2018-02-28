@@ -15,10 +15,18 @@ def plot_discrete(distributions, labels, show, save):
 		d = distributions[i]
 		plt.plot([d[k] for k in keys], label=labels[i])
 	plt.legend(loc=2)
+	'''
+	plt.xticks([])
+	plt.xlabel("Single Particle Paths")
+	plt.ylabel("Probability")
+	plt.title("Contact Process up to T=4")
+	'''
 	if show:
 		plt.show()
 	if save and save != "":
 		plt.savefig(save)
+
+
 
 
 def plot_continuous(distributions, labels, show, save):
@@ -29,6 +37,11 @@ def plot_continuous(distributions, labels, show, save):
 		for j in range(k-1):
 			plt.plot(np.arange(0, len(arr[:,j])*d['Dt'],d['Dt']), arr[:,j], label=(labels[i]+" P(X="+str(j))+")")
 	plt.legend(loc=2)
+	'''
+	plt.xlabel("Time")
+	plt.ylabel("Probability Typical Particle in state 0")
+	plt.title("Contact Process p=2/3, q=0.1")
+	'''
 	if show:
 		plt.show()
 	if save and save != "":

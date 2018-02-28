@@ -15,7 +15,7 @@ func getExpectation(T int, p,q float64, nu float64) []float64 {
 		f_new := make([]float64, T)
 		f_new[0] = nu
 		for t := 1; t < i+1; t++ {
-			f_new[t] = f_new[t-1]*(1-q) + (1-f_new[t-1])*p*f[t-1]
+			f_new[t] = f_new[t-1]*(1-q) + (1-f_new[t-1])*(p/2.0)*f[t-1]
 		}
 		f = f_new
 	}
@@ -49,6 +49,21 @@ func MeanFieldRecursionRealization(T int, p,q float64, nu float64, r *rand.Rand,
 
 	return X
 }
+
+func RecursionTypicalDistrByt(T int, p, q float64, nu float64, steps int) probutil.ContDistr {
+	k := 2
+	g := getExpectation(T,p,q,nu)
+	fmt.Println(g)
+	f := make([][]float64, T)
+	for t := 0; t < T; t++ {
+		f[t] = make([]float64, k)
+		f[t][0] = 1-g[t]
+		f[t][1] = g[t]
+	}
+
+	return probutil.ContDistr{1, float64(T), k, f}
+}
+
 
 func RecursionTypicalDistr(T int, p, q float64, nu float64, steps int) probutil.Distr {
 	// Ger random number to be used throughout

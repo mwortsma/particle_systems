@@ -64,6 +64,8 @@ func main() {
 	mean_field_realization := flag.Bool("mean_field_realization", false, "Mean Field simulation.")
 	mean_field_fp := flag.Bool("mean_field_fp", false, "Mean Field fixed point simulation.")
 	mean_field_recursion := flag.Bool("mean_field_recursion", false, "Mean Field simulation.")
+	mean_field_recursion_byt := flag.Bool("mean_field_recursion_byt", false, "Mean Field simulation.")
+
 
 	rec_full := flag.Bool("rec_full", false, "rec_full")
 	rec := flag.Bool("rec", false, "rec")
@@ -137,6 +139,9 @@ func main() {
 
 	case *mean_field_recursion:
 		distr = dtcp_mean_field.RecursionTypicalDistr(*T, *p, *q, *nu, *steps)
+
+	case *mean_field_recursion_byt:
+		distr = dtcp_mean_field.RecursionTypicalDistrByt(*T, *p, *q, *nu, *steps)
 
 	case *rec_full:
 		distr = dtcp_rec.FullRun(*T,*tau, *d, *p,*q, *nu)
